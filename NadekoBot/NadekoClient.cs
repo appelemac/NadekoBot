@@ -1,14 +1,12 @@
-﻿using Discord.Commands;
+﻿using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using Discord;
-using System.Reflection;
 
 namespace NadekoBot
 {
@@ -18,10 +16,11 @@ namespace NadekoBot
         public static CommandService Commands { get; set; }
         public static Models.Credentials Creds { get; set; }
         public static string BotMention { get; set; } = "";
-
+        public static string DataDir { get; set; } = "";
 
         public static void Main(string[] args)
         {
+            DataDir = Directory.GetParent(Assembly.GetEntryAssembly().Location).CreateSubdirectory("data").ToString();
             Console.OutputEncoding = Encoding.Unicode;
             InitializeCredentials();
             SocketClient = new DiscordSocketClient(new Discord.DiscordSocketConfig()
@@ -29,7 +28,6 @@ namespace NadekoBot
                 AudioMode = Discord.Audio.AudioMode.Disabled,
                 MessageCacheSize = 0,
                 LogLevel = Discord.LogSeverity.Verbose,
-                
             });
             Commands = new CommandService();
             new NadekoClient().Start().GetAwaiter().GetResult();
@@ -66,7 +64,7 @@ namespace NadekoBot
 
         private bool IsCommand(IMessage msg, ref int argPos)
         {
-            foreach (var prefix in new [] { "nadeko!"})
+            foreach (var prefix in new[] { "nadeko!" })
             {
                 if (msg.HasStringPrefix(prefix, ref argPos)) return true;
             }
@@ -77,7 +75,7 @@ namespace NadekoBot
         {
             try
             {
-                File.WriteAllText("credentials_example.json", JsonConvert.SerializeObject(new Models.Credentials(), Formatting.Indented));
+                File.WriteAllText(Path.Combine(DataDir,"credentials_example.json"), JsonConvert.SerializeObject(new Models.Credentials(), Formatting.Indented));
             }
             catch (Exception e)
             {
@@ -85,9 +83,9 @@ namespace NadekoBot
             }
             try
             {
-                Creds = JsonConvert.DeserializeObject<Models.Credentials>(File.ReadAllText("credentials.json"));
-               
-            } catch (Exception e)
+                Creds = JsonConvert.DeserializeObject<Models.Credentials>(File.ReadAllText(Path.Combine(DataDir,"credentials.json")));
+            }
+            catch (Exception e)
             {
                 Console.WriteLine(NadekoBot.Strings.NadekoClient_InitializeCredentials_CouldNotInitializeCredentialsFromCredentialsJson0Quitting, e.Message);
                 Console.Read();

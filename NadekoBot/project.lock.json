@@ -6955,7 +6955,8 @@
       "Discord.Net >= 1.0.0-dev-*",
       "Discord.Net.Commands >= 1.0.0-dev-*",
       "Microsoft.NETCore.App >= 1.0.0",
-      "Newtonsoft.Json >= 9.0.1"
+      "Newtonsoft.Json >= 9.0.1",
+      "System.Linq.Expressions >= 4.1.0"
     ],
     ".NETCoreApp,Version=v1.0": []
   },
