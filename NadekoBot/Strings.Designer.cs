@@ -70,6 +70,15 @@ namespace NadekoBot {
         }
         
         /// <summary>
+        ///    Looks up a localized string similar to Could not read Token, quitting....
+        /// </summary>
+        public static string NadekoClient_InitializeCredentials_CouldNotReadTokenQuitting {
+            get {
+                return ResourceManager.GetString("NadekoClient_InitializeCredentials_CouldNotReadTokenQuitting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///    Looks up a localized string similar to Writing example of credentials failed: {0}.
         /// </summary>
         public static string NadekoClient_Main_WritingExampleOfCredentialsFailed0 {

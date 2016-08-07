@@ -103,4 +103,7 @@
   <data name="NadekoClient_InitializeCredentials_CouldNotInitializeCredentialsFromCredentialsJson0Quitting" xml:space="preserve">
     <value>Could not initialize Credentials from credentials.json: {0}, quitting...</value>
   </data>
+  <data name="NadekoClient_InitializeCredentials_CouldNotReadTokenQuitting" xml:space="preserve">
+    <value>Could not read Token, quitting...</value>
+  </data>
 </root>
