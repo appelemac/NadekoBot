@@ -75,7 +75,7 @@ namespace NadekoBot
         {
             try
             {
-                File.WriteAllText(Path.Combine(DataDir,"credentials_example.json"), JsonConvert.SerializeObject(new Models.Credentials(), Formatting.Indented));
+                File.WriteAllText(Path.Combine(DataDir, "credentials_example.json"), JsonConvert.SerializeObject(new Models.Credentials(), Formatting.Indented));
             }
             catch (Exception e)
             {
@@ -83,7 +83,7 @@ namespace NadekoBot
             }
             try
             {
-                Creds = JsonConvert.DeserializeObject<Models.Credentials>(File.ReadAllText(Path.Combine(DataDir,"credentials.json")));
+                Creds = JsonConvert.DeserializeObject<Models.Credentials>(File.ReadAllText(Path.Combine(DataDir, "credentials.json")));
             }
             catch (Exception e)
             {

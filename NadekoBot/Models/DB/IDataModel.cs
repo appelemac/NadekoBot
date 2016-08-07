@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace NadekoBot.Models.DB
 {
@@ -9,6 +6,9 @@ namespace NadekoBot.Models.DB
     {
         public int? Id { get; set; }
         public DateTime DateAdded { get; set; } = DateTime.UtcNow;
-        public IDataModel() { }
+
+        public IDataModel()
+        {
+        }
     }
 }
