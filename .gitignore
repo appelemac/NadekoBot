@@ -48,3 +48,4 @@ NadekoBot/bin/Debug/data/config_xnaas.json
 .vs/Discord.Net.Commands/CodeMAP.dat
 .vs/Discord.Net.Modules/CodeMAP.dat
 .vs/Discord.Net/CodeMAP.dat
+*.dat
