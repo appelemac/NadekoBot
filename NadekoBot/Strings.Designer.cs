@@ -86,5 +86,32 @@ namespace NadekoBot {
                 return ResourceManager.GetString("NadekoClient_Main_WritingExampleOfCredentialsFailed0", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///    Looks up a localized string similar to Connected.
+        /// </summary>
+        public static string NadekoClient_Start_Connected {
+            get {
+                return ResourceManager.GetString("NadekoClient_Start_Connected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///    Looks up a localized string similar to Connecting to Discord....
+        /// </summary>
+        public static string NadekoClient_Start_ConnectingToDiscord {
+            get {
+                return ResourceManager.GetString("NadekoClient_Start_ConnectingToDiscord", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///    Looks up a localized string similar to Ready to receive commands.
+        /// </summary>
+        public static string NadekoClient_Start_ReadyToReceiveCommands {
+            get {
+                return ResourceManager.GetString("NadekoClient_Start_ReadyToReceiveCommands", resourceCulture);
+            }
+        }
     }
 }

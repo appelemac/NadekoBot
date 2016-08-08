@@ -106,4 +106,13 @@
   <data name="NadekoClient_InitializeCredentials_CouldNotReadTokenQuitting" xml:space="preserve">
     <value>Could not read Token, quitting...</value>
   </data>
+  <data name="NadekoClient_Start_ConnectingToDiscord" xml:space="preserve">
+    <value>Connecting to Discord...</value>
+  </data>
+  <data name="NadekoClient_Start_Connected" xml:space="preserve">
+    <value>Connected</value>
+  </data>
+  <data name="NadekoClient_Start_ReadyToReceiveCommands" xml:space="preserve">
+    <value>Ready to receive commands</value>
+  </data>
 </root>

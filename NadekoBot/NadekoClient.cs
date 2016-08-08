@@ -1,6 +1,8 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using NadekoBot.Classes;
+using NadekoBot.Database;
 using Newtonsoft.Json;
 using System;
 using System.IO;
@@ -13,31 +15,53 @@ namespace NadekoBot
     public class NadekoClient
     {
         public static DiscordSocketClient SocketClient { get; private set; }
+        public static Stats NadekoStats { get; set; }
         public static CommandService Commands { get; set; }
         public static Models.Credentials Creds { get; set; }
         public static string BotMention { get; set; } = "";
         public static string DataDir { get; set; } = "";
+        private static Logger _logger { get; set; }
+        public static ADataBase DB { get; set; }
 
         public static void Main(string[] args)
         {
-            DataDir = Directory.GetParent(Assembly.GetEntryAssembly().Location).CreateSubdirectory("data").ToString();
-            Console.OutputEncoding = Encoding.Unicode;
-            InitializeCredentials();
+            Init();
+            
             SocketClient = new DiscordSocketClient(new Discord.DiscordSocketConfig()
             {
                 AudioMode = Discord.Audio.AudioMode.Disabled,
                 MessageCacheSize = 0,
-                LogLevel = Discord.LogSeverity.Verbose,
+                LogLevel = Discord.LogSeverity.Warning,
             });
+            
             Commands = new CommandService();
             new NadekoClient().Start().GetAwaiter().GetResult();
         }
 
+        private static void Init()
+        {
+            _logger = new Logger();
+            DataDir = Directory.GetParent(Assembly.GetEntryAssembly().Location).CreateSubdirectory("data").ToString();
+            Console.OutputEncoding = Encoding.Unicode;
+            NadekoStats = new Stats(new Logger());
+            InitializeCredentials();
+            BotMention = $"<@{Creds.BotId}>";
+#if true
+            DB = new MySQLiteDB();
+#else
+            DB = new mySQLiteDB();
+#endif
+        }
+
         private async Task Start()
         {
+            _logger.LogInformation(NadekoBot.Strings.NadekoClient_Start_ConnectingToDiscord);
             await SocketClient.LoginAsync(Discord.TokenType.Bot, Creds.Token);
             await SocketClient.ConnectAsync();
+            _logger.LogInformation(NadekoBot.Strings.NadekoClient_Start_Connected);
             await InstallCommands();
+            _logger.LogInformation(NadekoBot.Strings.NadekoClient_Start_ReadyToReceiveCommands);
+            
             await Task.Delay(-1);
         }
 
@@ -53,11 +77,11 @@ namespace NadekoBot
             int argPos = 0;
             if (IsCommand(msg, ref argPos))
             {
-                Console.WriteLine($@"Command: {msg.Content}");
+                _logger.LogInformation($@"Command: {msg.Content}");
                 var result = await Commands.Execute(msg, argPos);
                 if (!result.IsSuccess)
-                {
-                    Console.WriteLine($"Command {msg.Content} failed: {result.ErrorReason}");
+                {   
+                    _logger.LogError($"Command {msg.Content} failed: {result.ErrorReason}");
                 }
             }
         }
@@ -79,7 +103,7 @@ namespace NadekoBot
             }
             catch (Exception e)
             {
-                Console.WriteLine(Strings.NadekoClient_Main_WritingExampleOfCredentialsFailed0, e.Message);
+                _logger.LogError(Strings.NadekoClient_Main_WritingExampleOfCredentialsFailed0, e.Message);
             }
             try
             {
@@ -87,17 +111,17 @@ namespace NadekoBot
             }
             catch (Exception e)
             {
-                Console.WriteLine(NadekoBot.Strings.NadekoClient_InitializeCredentials_CouldNotInitializeCredentialsFromCredentialsJson0Quitting, e.Message);
+                _logger.LogCritical(NadekoBot.Strings.NadekoClient_InitializeCredentials_CouldNotInitializeCredentialsFromCredentialsJson0Quitting, e.Message);
                 Console.Read();
                 Environment.Exit(1);
             }
             if (string.IsNullOrWhiteSpace(Creds.Token))
             {
-                Console.WriteLine(NadekoBot.Strings.NadekoClient_InitializeCredentials_CouldNotReadTokenQuitting);
+                _logger.LogCritical(NadekoBot.Strings.NadekoClient_InitializeCredentials_CouldNotReadTokenQuitting);
                 Console.Read();
                 Environment.Exit(1);
             }
-            BotMention = $"<@{Creds.BotId}>";
+           
         }
     }
 }

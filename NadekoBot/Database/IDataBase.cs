@@ -1,11 +1,23 @@
-﻿using NadekoBot.Models.DB;
+﻿using Microsoft.EntityFrameworkCore;
+using NadekoBot.Models.DB;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 
+
 namespace NadekoBot.Database
 {
-    internal interface IDataBase
+    
+
+    public abstract class ADataBase : DbContext
+    {
+        public DbSet<CommandModel> Commands { get; set; }
+        public DbSet<ServerModel> Servers { get; set; }
+        
+        protected abstract override void OnConfiguring(DbContextOptionsBuilder optionsBuilder);
+
+    }
+    public interface IDataBase
     {
         /// <summary>
         /// Find the first instance of this type which returns true on the given expression
