@@ -33,7 +33,7 @@ namespace NadekoBot
                 MessageCacheSize = 0,
                 LogLevel = Discord.LogSeverity.Warning,
             });
-            
+            NadekoStats = new Stats(new Logger());
             Commands = new CommandService();
             new NadekoClient().Start().GetAwaiter().GetResult();
         }
@@ -43,15 +43,25 @@ namespace NadekoBot
             _logger = new Logger();
             DataDir = Directory.GetParent(Assembly.GetEntryAssembly().Location).CreateSubdirectory("data").ToString();
             Console.OutputEncoding = Encoding.Unicode;
-            NadekoStats = new Stats(new Logger());
+            
             InitializeCredentials();
             BotMention = $"<@{Creds.BotId}>";
 #if true
             DB = new MySQLiteDB();
 #else
-            DB = new mySQLiteDB();
+            DB = new MySQLServerDB();
 #endif
+            DB.Commands.Add(new Models.DB.CommandModel()
+            {
+                ChannelId = 0,
+                CommandContent = "Cool",
+                UserId = 1
+            });
+            DB.SaveChanges();
         }
+
+       
+
 
         private async Task Start()
         {

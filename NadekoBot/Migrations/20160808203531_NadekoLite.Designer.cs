@@ -8,9 +8,10 @@ using NadekoBot.Database;
 namespace NadekoBot.Migrations
 {
     [DbContext(typeof(MySQLiteDB))]
-    partial class MySQLiteDBModelSnapshot : ModelSnapshot
+    [Migration("20160808203531_NadekoLite")]
+    partial class NadekoLite
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.0.0-rtm-21431");

@@ -5,15 +5,17 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using NadekoBot.Database;
 
-namespace NadekoBot.Migrations
+namespace NadekoBot.Migrations.MySQLServerDBMigrations
 {
-    [DbContext(typeof(MySQLiteDB))]
-    partial class MySQLiteDBModelSnapshot : ModelSnapshot
+    [DbContext(typeof(MySQLServerDB))]
+    [Migration("20160808204620_NadekoServer")]
+    partial class NadekoServer
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
-                .HasAnnotation("ProductVersion", "1.0.0-rtm-21431");
+                .HasAnnotation("ProductVersion", "1.0.0-rtm-21431")
+                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("NadekoBot.Models.DB.CommandModel", b =>
                 {
