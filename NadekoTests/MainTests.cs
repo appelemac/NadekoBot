@@ -1,13 +1,15 @@
 ﻿using Xunit;
 using NadekoBot;
+using System.Threading.Tasks;
 
-namespace MyFirstDotNetCoreTests
+namespace NadekoTests
 {
-    public class Class1
+    public class MainTests
     {
         [Fact]
         public void PassingTest()
         {
+            
             Assert.Equal(4, Add(2, 2));
         }
 
