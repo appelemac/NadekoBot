@@ -33,6 +33,24 @@ namespace NadekoBot.Migrations
                     b.ToTable("Commands");
                 });
 
+            modelBuilder.Entity("NadekoBot.Models.DB.CurrencyModel", b =>
+                {
+                    b.Property<int?>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("CurrencyAmount");
+
+                    b.Property<DateTime>("DateAdded");
+
+                    b.Property<long>("ServerId");
+
+                    b.Property<long>("UserId");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Currency");
+                });
+
             modelBuilder.Entity("NadekoBot.Models.DB.ServerModel", b =>
                 {
                     b.Property<int?>("Id")

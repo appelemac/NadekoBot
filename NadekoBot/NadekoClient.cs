@@ -3,8 +3,10 @@ using Discord.Commands;
 using Discord.WebSocket;
 using NadekoBot.Classes;
 using NadekoBot.Database;
+using NadekoBot.Models.DB;
 using Newtonsoft.Json;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -51,13 +53,7 @@ namespace NadekoBot
 #else
             DB = new MySQLServerDB();
 #endif
-            DB.Commands.Add(new Models.DB.CommandModel()
-            {
-                ChannelId = 0,
-                CommandContent = "Cool",
-                UserId = 1
-            });
-            DB.SaveChanges();
+            
         }
 
        

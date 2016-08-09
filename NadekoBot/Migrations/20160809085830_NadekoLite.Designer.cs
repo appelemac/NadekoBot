@@ -5,17 +5,16 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using NadekoBot.Database;
 
-namespace NadekoBot.Migrations.MySQLServerDBMigrations
+namespace NadekoBot.Migrations
 {
-    [DbContext(typeof(MySQLServerDB))]
-    [Migration("20160808202309_NadekoDB")]
-    partial class NadekoDB
+    [DbContext(typeof(MySQLiteDB))]
+    [Migration("20160809085830_NadekoLite")]
+    partial class NadekoLite
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
-                .HasAnnotation("ProductVersion", "1.0.0-rtm-21431")
-                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                .HasAnnotation("ProductVersion", "1.0.0-rtm-21431");
 
             modelBuilder.Entity("NadekoBot.Models.DB.CommandModel", b =>
                 {
@@ -33,6 +32,24 @@ namespace NadekoBot.Migrations.MySQLServerDBMigrations
                     b.HasKey("Id");
 
                     b.ToTable("Commands");
+                });
+
+            modelBuilder.Entity("NadekoBot.Models.DB.CurrencyModel", b =>
+                {
+                    b.Property<int?>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("CurrencyAmount");
+
+                    b.Property<DateTime>("DateAdded");
+
+                    b.Property<long>("ServerId");
+
+                    b.Property<long>("UserId");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Currency");
                 });
 
             modelBuilder.Entity("NadekoBot.Models.DB.ServerModel", b =>
