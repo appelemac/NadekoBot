@@ -17,7 +17,7 @@ namespace NadekoBot.Database
         public DbSet<CommandModel> Commands { get; set; }
         public DbSet<ServerModel> Servers { get; set; }
         public DbSet<CurrencyModel> Currency { get; set; }
-
+        public DbSet<ServerSpecificConfig> ServerConfigs { get; set; }
         protected abstract override void OnConfiguring(DbContextOptionsBuilder optionsBuilder);
 
       
