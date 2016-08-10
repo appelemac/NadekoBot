@@ -60,6 +60,24 @@ namespace NadekoBot {
         }
         
         /// <summary>
+        ///    Looks up a localized string similar to Failed Creating commands; following errors occurred:\n.
+        /// </summary>
+        public static string ExternalCommandsBuilder_Compile_FailedCreatingCommandsFollowingErrorsOccurredN {
+            get {
+                return ResourceManager.GetString("ExternalCommandsBuilder_Compile_FailedCreatingCommandsFollowingErrorsOccurredN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///    Looks up a localized string similar to Succesfully compiled commands.
+        /// </summary>
+        public static string ExternalCommandsBuilder_Compile_SuccesfullyCompiledCommands {
+            get {
+                return ResourceManager.GetString("ExternalCommandsBuilder_Compile_SuccesfullyCompiledCommands", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///    Looks up a localized string similar to Could not initialize Credentials from credentials.json: {0}, quitting....
         /// </summary>
         public static string NadekoClient_InitializeCredentials_CouldNotInitializeCredentialsFromCredentialsJson0Quitting {

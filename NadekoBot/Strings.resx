@@ -124,4 +124,10 @@
   <data name="Utilities_RenameCommand_OwnerOnlyCommand" xml:space="preserve">
     <value>Owner-only command</value>
   </data>
+  <data name="ExternalCommandsBuilder_Compile_FailedCreatingCommandsFollowingErrorsOccurredN" xml:space="preserve">
+    <value>Failed Creating commands; following errors occurred:\n</value>
+  </data>
+  <data name="ExternalCommandsBuilder_Compile_SuccesfullyCompiledCommands" xml:space="preserve">
+    <value>Succesfully compiled commands</value>
+  </data>
 </root>

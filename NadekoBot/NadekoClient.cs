@@ -49,16 +49,15 @@ namespace NadekoBot
             
             InitializeCredentials();
             BotMention = $"<@{Creds.BotId}>";
-#if true
             DB = new MySQLiteDB();
-#else
-            DB = new MySQLServerDB();
-#endif
-            
+            InitializeExternalCommands();
         }
 
-       
+        private static void InitializeExternalCommands()
+        {
+            Directory.CreateDirectory(Path.Combine(DataDir, "External Commands"));
 
+        }
 
         private async Task Start()
         {
