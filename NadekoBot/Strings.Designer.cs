@@ -113,5 +113,32 @@ namespace NadekoBot {
                 return ResourceManager.GetString("NadekoClient_Start_ReadyToReceiveCommands", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///    Looks up a localized string similar to New name must be allowed.
+        /// </summary>
+        public static string Utilities_RenameCommand_NewNameMustBeAllowed {
+            get {
+                return ResourceManager.GetString("Utilities_RenameCommand_NewNameMustBeAllowed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///    Looks up a localized string similar to Owner-only command.
+        /// </summary>
+        public static string Utilities_RenameCommand_OwnerOnlyCommand {
+            get {
+                return ResourceManager.GetString("Utilities_RenameCommand_OwnerOnlyCommand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///    Looks up a localized string similar to Success; changed username to {0}.
+        /// </summary>
+        public static string Utilities_RenameCommand_SuccessChangedUsernameTo0 {
+            get {
+                return ResourceManager.GetString("Utilities_RenameCommand_SuccessChangedUsernameTo0", resourceCulture);
+            }
+        }
     }
 }

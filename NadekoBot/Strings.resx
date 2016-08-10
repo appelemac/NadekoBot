@@ -115,4 +115,13 @@
   <data name="NadekoClient_Start_ReadyToReceiveCommands" xml:space="preserve">
     <value>Ready to receive commands</value>
   </data>
+  <data name="Utilities_RenameCommand_SuccessChangedUsernameTo0" xml:space="preserve">
+    <value>Success; changed username to {0}</value>
+  </data>
+  <data name="Utilities_RenameCommand_NewNameMustBeAllowed" xml:space="preserve">
+    <value>New name must be allowed</value>
+  </data>
+  <data name="Utilities_RenameCommand_OwnerOnlyCommand" xml:space="preserve">
+    <value>Owner-only command</value>
+  </data>
 </root>

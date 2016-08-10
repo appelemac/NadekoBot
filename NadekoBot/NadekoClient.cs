@@ -11,6 +11,7 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace NadekoBot
 {
@@ -129,5 +130,7 @@ namespace NadekoBot
             }
            
         }
+
+        internal static bool IsOwner(ulong id) => Creds.OwnerIds.Contains(id);
     }
 }
