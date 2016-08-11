@@ -22,6 +22,7 @@ namespace NadekoBot.ExternalCommands
 
         internal ExternalCommandsBuilder()
         {
+            _logger = new Logger();
             _references = new List<PortableExecutableReference>();
             _codeContents = new List<string>();
             LoadDefaultReferences();
