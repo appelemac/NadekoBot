@@ -145,7 +145,7 @@ namespace NadekoBot
             }
             catch (Exception e)
             {
-                _logger.LogCritical(NadekoBot.Strings.NadekoClient_InitializeCredentials_CouldNotInitializeCredentialsFromCredentialsJson0Quitting, e.Message);
+                _logger.LogCritical(, e.Message);
                 Console.Read();
                 Environment.Exit(1);
             }

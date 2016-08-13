@@ -117,6 +117,39 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="NadekoClient_Main_WritingExampleOfCredentialsFailed0" xml:space="preserve">
+    <value>Writing example of credentials failed: {0}</value>
+  </data>
+  <data name="NadekoClient_InitializeCredentials_CouldNotInitializeCredentialsFromCredentialsJson0Quitting" xml:space="preserve">
+    <value>Could not initialize Credentials from credentials.json: {0}, quitting...</value>
+  </data>
+  <data name="NadekoClient_InitializeCredentials_CouldNotReadTokenQuitting" xml:space="preserve">
+    <value>Could not read Token, quitting...</value>
+  </data>
+  <data name="NadekoClient_Start_ConnectingToDiscord" xml:space="preserve">
+    <value>Connecting to Discord...</value>
+  </data>
+  <data name="NadekoClient_Start_Connected" xml:space="preserve">
+    <value>Connected</value>
+  </data>
+  <data name="NadekoClient_Start_ReadyToReceiveCommands" xml:space="preserve">
+    <value>Ready to receive commands</value>
+  </data>
+  <data name="Utilities_RenameCommand_SuccessChangedUsernameTo0" xml:space="preserve">
+    <value>Success; changed username to {0}</value>
+  </data>
+  <data name="Utilities_RenameCommand_NewNameMustBeAllowed" xml:space="preserve">
+    <value>New name must be allowed</value>
+  </data>
+  <data name="Utilities_RenameCommand_OwnerOnlyCommand" xml:space="preserve">
+    <value>Owner-only command</value>
+  </data>
+  <data name="ExternalCommandsBuilder_Compile_FailedCreatingCommandsFollowingErrorsOccurredN" xml:space="preserve">
+    <value>Failed Creating commands; following errors occurred:\n</value>
+  </data>
+  <data name="ExternalCommandsBuilder_Compile_SuccesfullyCompiledCommands" xml:space="preserve">
+    <value>Succesfully compiled commands</value>
+  </data>
   <data name="h_text" xml:space="preserve">
     <value>h</value>
   </data>
