@@ -93,7 +93,6 @@ namespace NadekoBot
             await InstallCommands();
             await InitializeExternalCommands();
             _logger.LogInformation(NadekoBot.Strings.NadekoClient_Start_ReadyToReceiveCommands);
-
             await Task.Delay(-1);
         }
 

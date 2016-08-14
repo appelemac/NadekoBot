@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NadekoBot.Modules.CusomCommands
+namespace NadekoBot.Modules.CustomCommands
 {
     public class CCBuilder
     {

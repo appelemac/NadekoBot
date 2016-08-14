@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace NadekoBot.Modules.CusomCommands
+namespace NadekoBot.Modules.CustomCommands
 {
     [Module]
     public class CCManager

@@ -83,14 +83,16 @@ namespace NadekoBot.Modules.Utility
         [LocalizedCommand, LocalizedDescription, LocalizedSummary, RequireContext(ContextType.Guild)]
         public async Task Roles(IMessage msg, IGuildUser target = null)
         {
+            var guild = (msg.Channel as IGuildChannel).Guild;
             if (target != null)
             {
-                await msg.Reply($"`List of roles for **{target.Username}**:` \n• " + string.Join("\n• ", target.Roles));
+                await msg.Reply($"`List of roles for **{target.Username}**:` \n• " + string.Join("\n• ", target.Roles.Except(new[] { guild.EveryoneRole })));
             } else
             {
-                await msg.Reply("`List of roles:` \n• " + string.Join("\n• ", (msg.Channel as IGuildChannel).Guild.Roles));
+                await msg.Reply("`List of roles:` \n• " + string.Join("\n• ", (msg.Channel as IGuildChannel).Guild.Roles.Except(new[] { guild.EveryoneRole })));
             }
         }
+
         [LocalizedCommand, LocalizedDescription, LocalizedSummary, RequireContext(ContextType.Guild)]
         public async Task Remind(IMessage msg, string meOrChannel, string time, [Remainder] string message)
         {
