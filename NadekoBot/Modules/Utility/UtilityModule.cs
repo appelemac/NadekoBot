@@ -229,7 +229,7 @@ namespace NadekoBot.Modules.Utility
         }
         [LocalizedCommand, LocalizedDescription, LocalizedSummary]
         [RequireContext(ContextType.Guild)]
-        public async Task USerInfo(IMessage msg, IGuildUser usr = null)
+        public async Task UserInfo(IMessage msg, IGuildUser usr = null)
         {
             var channel = msg.Channel as IGuildChannel;
             var user = usr ?? msg.Author as IGuildUser;
