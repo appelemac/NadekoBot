@@ -74,6 +74,8 @@ namespace NadekoBot.Services.Impl
             "🦀",
             "🦄"
         };
+
+        public string ExternalCommandsFolder { get; set; } = "External Commands";
     }
 
 

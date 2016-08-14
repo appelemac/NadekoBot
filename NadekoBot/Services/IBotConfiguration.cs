@@ -26,7 +26,7 @@ namespace NadekoBot.Services
 
         List<string> EightBallResponses { get; set; }
         Currency Currency { get; set; }
-
+        string ExternalCommandsFolder { get; set; }
         IModulePrefixes ModulePrefixes { get; set; }
     }
 

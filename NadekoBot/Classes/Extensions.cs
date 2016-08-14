@@ -18,15 +18,18 @@ namespace NadekoBot.Classes
             if (content.Length < 2000) return new[] { await msg.Channel.SendMessageAsync(content) };
             var list = new List<IMessage>();
 
-            var temp = Regex.Split(content, breakOn).Select(x=>x += breakOn).ToArray();
-            if (temp.Any(x => x.Length > 2000))
+            var temp = Regex.Split(content, breakOn).Select(x => x += breakOn).ToList();
+            string toolong;
+            while ((toolong = temp.FirstOrDefault(x => x.Length > 2000)) != null)
             {
-                //TODO more desperate measures
+                temp.
+                
+                //TODO more desperate measures == split on whitespace?
             }
 
             StringBuilder builder = new StringBuilder();
             //TODO make this less crappy to look at, maybe it's bugged
-            for (int i = 0; i < temp.Length; i++)
+            for (int i = 0; i < temp.Count; i++)
             {
                 var addition = temp[i];
                 //we append 
@@ -35,9 +38,9 @@ namespace NadekoBot.Classes
                 else builder.Append(addition);
 
                 //Check if the next would have room
-                if (i + 1 >= temp.Length || temp[i + 1].Length + builder.Length + addToEnd.Length > 2000)
+                if (i + 1 >= temp.Count || temp[i + 1].Length + builder.Length + addToEnd.Length > 2000)
                 {
-                    if (i + 1 < temp.Length) builder.Append(addToEnd);
+                    if (i + 1 < temp.Count) builder.Append(addToEnd);
                     list.Add(await msg.Channel.SendMessageAsync(builder.ToString()));
                     builder.Clear();
                 }
@@ -45,5 +48,12 @@ namespace NadekoBot.Classes
 
             return list.ToArray();
         }
+
+        public static async Task<IMessage> Prompt(this IMessage msg, string promptMessage, params string[] options)
+        {
+            await msg.Reply(promptMessage);
+
+        }
+        
     }
 }

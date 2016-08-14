@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Collections.Generic;
+using NadekoBot.Services;
 
 namespace NadekoBot
 {
@@ -20,7 +21,9 @@ namespace NadekoBot
     {
         public static DiscordSocketClient SocketClient { get; private set; }
         public static Stats NadekoStats { get; set; }
-        public static CommandService Commands { get; set; }
+        public static CommandService CommandService { get; set; }
+        public static IBotConfiguration Conf { get; set; }
+        public static string ExternalCommandsDir { get; set; }
         public static Models.Credentials Creds { get; set; }
         public static string BotMention { get; set; } = "";
         public static string DataDir { get; set; } = "";
@@ -40,7 +43,7 @@ namespace NadekoBot
                 LogLevel = Discord.LogSeverity.Warning,
             });
             NadekoStats = new Stats(new Logger());
-            Commands = new CommandService();
+            CommandService = new CommandService();
             new NadekoClient().Start().GetAwaiter().GetResult();
         }
 
@@ -51,19 +54,23 @@ namespace NadekoBot
             Console.OutputEncoding = Encoding.Unicode;
 
             InitializeCredentials();
+            InitializeConfiguration();
             BotMention = $"<@{Creds.BotId}>";
             DB = new MySQLiteDB();
 
         }
 
+        
+
         public static async Task InitializeExternalCommands()
         {
-            string path = Path.Combine(DataDir, "External Commands");
-            Directory.CreateDirectory(Path.Combine(path, "References"));
-            if (Directory.EnumerateFiles(path).Any())
+            
+            ExternalCommandsDir = Path.Combine(DataDir, Conf.ExternalCommandsFolder);
+            Directory.CreateDirectory(Path.Combine(ExternalCommandsDir, "References"));
+            if (Directory.EnumerateFiles(ExternalCommandsDir).Any())
             {
                 _logger.LogDebug("Compiling and installing custom commands");
-                ExternalCommands = new NadekoBot.ExternalCommands.ExternalCommands(path);
+                ExternalCommands = new NadekoBot.ExternalCommands.ExternalCommands(ExternalCommandsDir);
                 var assembly = ExternalCommands.getResultingAssembly();
                 if (assembly == null) _logger.LogError("Not loading external commands");
                 else
@@ -72,13 +79,13 @@ namespace NadekoBot
                     {
                         foreach (var mod in _externalModules)
                         {
-                           await Commands.Unload(mod);
+                           await CommandService.Unload(mod);
                         }
                         _externalModules.Clear();
                     }
-                    var temp = Commands.Modules;
-                    await Commands.LoadAssembly(assembly);
-                    _externalModules = Commands.Modules.Except(temp).ToList();
+                    var temp = CommandService.Modules;
+                    await CommandService.LoadAssembly(assembly);
+                    _externalModules = CommandService.Modules.Except(temp).ToList();
                 }
                 _logger.LogDebug("done installing external commands");
             }
@@ -99,7 +106,7 @@ namespace NadekoBot
         private async Task InstallCommands()
         {
             SocketClient.MessageReceived += HandleMessage;
-            await Commands.LoadAssembly(Assembly.GetEntryAssembly());
+            await CommandService.LoadAssembly(Assembly.GetEntryAssembly());
         }
 
         private  Task HandleMessage(IMessage msg)
@@ -111,7 +118,7 @@ namespace NadekoBot
                 _logger.LogInformation($@"Command: {msg.Content}");
                 #pragma warning disable CS4014 //Cause it's what I want :D
                 Task.Run(async () => {
-                    var result = await Commands.Execute(msg, argPos);
+                    var result = await CommandService.Execute(msg, argPos);
                     if (!result.IsSuccess) _logger.LogError("Execution of {0} failed: {1}", msg, result.ErrorReason);
                 });
                 
@@ -153,6 +160,27 @@ namespace NadekoBot
                 _logger.LogCritical(NadekoBot.Strings.NadekoClient_InitializeCredentials_CouldNotReadTokenQuitting);
                 Console.Read();
                 Environment.Exit(1);
+            }
+
+        }
+        private static void InitializeConfiguration()
+        {
+            try
+            {
+                File.WriteAllText(Path.Combine(DataDir, "config_example.json"), JsonConvert.SerializeObject(new Services.Impl.BotConfiguration(), Formatting.Indented));
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(Strings.NadekoClient_Main_WritingExampleOfCredentialsFailed0, e.Message);
+            }
+            try
+            {
+              Conf = JsonConvert.DeserializeObject<IBotConfiguration>(  File.ReadAllText(Path.Combine(DataDir, "config.json")));
+            } catch (Exception e)
+            {
+                _logger.LogError("Could not load config.json: {0}.", e.Message);
+                _logger.LogInformation("Using default config");
+                Conf = new Services.Impl.BotConfiguration();
             }
 
         }
