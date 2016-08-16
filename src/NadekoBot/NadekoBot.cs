@@ -18,9 +18,9 @@ namespace NadekoBot
         public static CommandService Commands { get; private set; }
         public static DiscordSocketClient Client { get; private set; }
         public static string DataDir { get; set; }
-        public BotConfiguration Config { get; private set; }
-        public Localization Localizer { get; private set; }
-
+        public static BotConfiguration Config { get; private set; }
+        public static Localization Localizer { get; private set; }
+        public static BotCredentials Credentials { get; private set; }
         public async Task RunAsync(string[] args)
         {
             //I'm adding this for now, though we'll be moving everything to DB
@@ -38,7 +38,7 @@ namespace NadekoBot
             Commands = new CommandService();
             Config = new BotConfiguration();
             Localizer = new Localization();
-
+            Credentials = new BotCredentials();
             //setup DI
             var depMap = new DependencyMap();
             depMap.Add<ILocalization>(Localizer);
