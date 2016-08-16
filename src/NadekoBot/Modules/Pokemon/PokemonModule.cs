@@ -10,6 +10,8 @@ using System.Collections.Concurrent;
 using NadekoBot.Extensions;
 using Newtonsoft.Json;
 using System.IO;
+using System.Text;
+using System.Reflection;
 
 namespace NadekoBot.Modules.Pokemon
 {
@@ -18,6 +20,7 @@ namespace NadekoBot.Modules.Pokemon
     {
         public ConcurrentDictionary<long, PokemonServer> Dictionary;
         public readonly List<PokemonType> PokemonTypes;
+        public readonly List<PokemonMove> PokemonMoves;
         private Random _rand;
         public PokemonModule(ILocalization loc, CommandService cmds, IBotConfiguration config, IDiscordClient client) : base(loc, cmds, config, client)
         {
@@ -28,6 +31,7 @@ namespace NadekoBot.Modules.Pokemon
             {
                 //TODO change this to loading from DB I guess?
                 PokemonTypes = JsonConvert.DeserializeObject<List<PokemonType>>(File.ReadAllText(Path.Combine(NadekoBot.DataDir, "pokemontypes.json")));
+                PokemonMoves = JsonConvert.DeserializeObject<List<PokemonMove>>(File.ReadAllText(Path.Combine(NadekoBot.DataDir, "pokemonmoves.json")));
             }
             catch (Exception e)
             {
@@ -67,6 +71,11 @@ namespace NadekoBot.Modules.Pokemon
                     await msg.Reply("One of the players is in a duel, and cannot engage other targets");
                     return;
                 }
+                //Check if already attacked
+                if (attacker.Attacked.Contains(defender))
+                {
+                    await msg.Reply("Already attacked {0}");
+                }
                 //check if the move was a valid one :D
                 if (!attacker.Moves.Any(kvp => kvp.Key.Name == attack))
                 {
@@ -83,7 +92,8 @@ namespace NadekoBot.Modules.Pokemon
                 }
                 //check agility for evasion~
                 var diff = defender.Stats.Agility - attacker.Stats.Agility;
-                //TODO mod this chance to make it purrfect
+                //TODO mod this chance to make it purrfect add accuracy?
+
                 var evaded = _rand.Next(1, 101) + diff > 85;
                 if (evaded)
                 {
@@ -111,6 +121,9 @@ namespace NadekoBot.Modules.Pokemon
                 {
                     message += string.Format("{0} has {1} HP left.", defender, defender.Stats.Health);
                 }
+                defender.Attacked.Remove(attacker);
+                attacker.Attacked.Add(defender);
+                //update Data
                 var atkIndex = serverPlayers.IndexOf(attacker);
                 var dfndIndex = serverPlayers.IndexOf(defender);
                 serverPlayers[atkIndex] = attacker;
@@ -119,9 +132,52 @@ namespace NadekoBot.Modules.Pokemon
                 Dictionary.TryUpdate((long)guild.Id, newServer, newServer);
             }
         }
+        [LocalizedCommand, LocalizedDescription, LocalizedSummary]
+        [RequireContext(ContextType.Guild)]
+        public async Task Stats(IMessage msg, IGuildUser arg = null)
+        {
+
+            var channel = msg.Channel as IGuildChannel;
+            var guild = channel.Guild;
+            var serverPlayers = Dictionary.GetOrAdd((long)guild.Id, new PokemonServer() { ServerId = (long)guild.Id }).Players;
+            StringBuilder builder = new StringBuilder();
+            PokemonPlayer player = serverPlayers.GetOrAdd((arg ?? msg.Author).Id, GenerateNewPlayer); 
+            builder.AppendLine(string.Format("{0}'s Stats: ```xl", player));
+            foreach (var p in player.Stats.GetType().GetProperties())
+            {
+                //TODO consider typing it out for localization purposes
+                builder.AppendLine($"{p.Name} : {p.GetValue(player.Stats, null).ToString()}");
+            }
+            builder.AppendLine(string.Format("Type : {0}",  player.PokemonType));
+            if (player.Duelist != null)
+            builder.AppendLine(string.Format("Duelist : {0}", player.Duelist));
+            await msg.Reply(builder.AppendLine("```").ToString());
+        }
+
+        [LocalizedCommand, LocalizedDescription, LocalizedSummary]
+        [RequireContext(ContextType.Guild)]
+        public async Task MovesList(IMessage msg, IGuildUser arg = null)
+        {
+            var channel = msg.Channel as IGuildChannel;
+            var guild = channel.Guild;
+            var serverPlayers = Dictionary.GetOrAdd((long)guild.Id, new PokemonServer() { ServerId = (long)guild.Id }).Players;
+            StringBuilder builder = new StringBuilder();
+            PokemonPlayer player = serverPlayers.GetOrAdd((arg ?? msg.Author).Id, GenerateNewPlayer);
+            builder.AppendLine(string.Format("{0}'s moves: ```xl", player));
+            foreach (var kvp in player.Moves)
+            {
+                var moveT = GetPokemonType(kvp.Key.MoveType);
+                //todo should probably make this a table, but that's irritating
+                builder.AppendLine(string.Format("{0}{1} | PP: {2}", kvp.Key.Name, moveT.Icon, kvp.Value));
+            }
+            builder.Append("```");
+            await msg.Reply(builder.ToString());
+        }
+        
 
         public PokemonPlayer GenerateNewPlayer(long id)
         {
+            var t = generateRandomType(id);
             return new PokemonPlayer()
             {
                 UserId = id,
@@ -131,13 +187,41 @@ namespace NadekoBot.Modules.Pokemon
                     Agility = _rand.Next(10, 50),
                     Strength = _rand.Next(80, 120)
                 },
-                Moves = generateRandomMoves()
+                PokemonType = generateRandomType(id),
+                Moves = generateRandomMoves(t),
+
             };
         }
 
-        private Dictionary<PokemonMove, int> generateRandomMoves()
+        private PokemonType generateRandomType(long id)
         {
-            throw new NotImplementedException();
+            return PokemonTypes[(int)(id % PokemonTypes.Count)];
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="focus">Moves will have at least 1 move of this type and will not have a move of a weakness of the type</param>
+        /// <returns></returns>
+        private Dictionary<PokemonMove, int> generateRandomMoves(PokemonType focus)
+        {
+            var dict = new Dictionary<PokemonMove, int>();
+            //2 steps: select a move with type Focus
+            var selectRange = PokemonMoves.Where(m => m.MoveType == focus.Name).ToList();
+            var selection = selectRange[_rand.Next(0, selectRange.Count)];
+            dict.Add(selection, selection.PP);
+            selectRange.AddRange(PokemonMoves.Where(m => !focus.Weaknesses.Contains(m.MoveType)));
+           
+            for (int i = 0; i < 3; i++)
+            {
+                selection = selectRange[_rand.Next(0, selectRange.Count)];
+                if (dict.ContainsKey(selection)) i--;
+                else dict.Add(selection, selection.PP);
+            }
+            return dict;
+        }
+
+        private PokemonType GetPokemonType(string name) => PokemonTypes.FirstOrDefault(p => p.Name == name);
     }
+    
 }

@@ -35,10 +35,7 @@ namespace NadekoBot.Modules.Pokemon
             return pl != null && pl.UserId == UserId;
         }
 
-        public override int GetHashCode()
-        {
-            return UserId.GetHashCode();
-        }
+        public override int GetHashCode() => UserId.GetHashCode();
     }
 
     public class PokemonStats
@@ -47,6 +44,7 @@ namespace NadekoBot.Modules.Pokemon
         public int Health { get; set; }
         public int Strength { get; set; }
         public int Agility { get; set; }
+        
     }
 
     public class PokemonMove
