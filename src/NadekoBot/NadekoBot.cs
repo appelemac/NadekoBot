@@ -6,6 +6,7 @@ using NadekoBot.Services;
 using NadekoBot.Services.Impl;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -16,11 +17,14 @@ namespace NadekoBot
     {
         public static CommandService Commands { get; private set; }
         public static DiscordSocketClient Client { get; private set; }
+        public static string DataDir { get; set; }
         public BotConfiguration Config { get; private set; }
         public Localization Localizer { get; private set; }
 
         public async Task RunAsync(string[] args)
         {
+            //I'm adding this for now, though we'll be moving everything to DB
+            DataDir = Path.Combine(Directory.GetParent(typeof(NadekoBot).GetTypeInfo().Assembly.Location).FullName, "data");
             //create client
             Client = new DiscordSocketClient(new DiscordSocketConfig
             {
@@ -34,7 +38,7 @@ namespace NadekoBot
             Commands = new CommandService();
             Config = new BotConfiguration();
             Localizer = new Localization();
-            
+
             //setup DI
             var depMap = new DependencyMap();
             depMap.Add<ILocalization>(Localizer);
@@ -45,7 +49,7 @@ namespace NadekoBot
             //connect
             await Client.LoginAsync(TokenType.Bot, "MTE5Nzc3MDIxMzE5NTc3NjEw.CpGoCA.yQBJbLWurrjSk7IlGpGzBm-tPTg");
             await Client.ConnectAsync();
-            
+
             //load commands
             await Commands.LoadAssembly(Assembly.GetEntryAssembly(), depMap);
             Client.MessageReceived += Client_MessageReceived;
@@ -57,9 +61,9 @@ namespace NadekoBot
 
         private async Task Client_MessageReceived(IMessage arg)
         {
-                var t = await Commands.Execute(arg, 0);
-                if(!t.IsSuccess)
-                    Console.WriteLine(t.ErrorReason);
+            var t = await Commands.Execute(arg, 0);
+            if (!t.IsSuccess)
+                Console.WriteLine(t.ErrorReason);
         }
     }
 }

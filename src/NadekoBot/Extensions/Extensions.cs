@@ -10,7 +10,7 @@ namespace NadekoBot.Extensions
 {
     public static class Extensions
     {
-        public static async Task<IMessage> Reply(this IMessage msg, string content) => await msg.Channel.SendMessageAsync(content);
+        public static async Task<IMessage> Reply(this IMessage msg, string content, params object[] args) => await msg.Channel.SendMessageAsync(string.Format(content, args));
 
         public static async Task<IMessage[]> ReplyLong(this IMessage msg, string content, string breakOn = "\n", string addToEnd = "", string addToStart = "")
         {
