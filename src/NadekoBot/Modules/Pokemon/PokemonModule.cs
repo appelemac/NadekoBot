@@ -21,17 +21,20 @@ namespace NadekoBot.Modules.Pokemon
         public ConcurrentDictionary<long, PokemonServer> Dictionary;
         public readonly List<PokemonType> PokemonTypes;
         public readonly List<PokemonMove> PokemonMoves;
+        public ConcurrentDictionary<PokemonPlayer, PokemonPlayer> DuelProposals;
         private Random _rand;
         public PokemonModule(ILocalization loc, CommandService cmds, IBotConfiguration config, IDiscordClient client) : base(loc, cmds, config, client)
         {
+            var DataDir = Path.Combine(Directory.GetParent(typeof(NadekoBot).GetTypeInfo().Assembly.Location).FullName, "data");
             Dictionary = new ConcurrentDictionary<long, PokemonServer>();
+            DuelProposals = new ConcurrentDictionary<PokemonPlayer, PokemonPlayer>();
             _rand = new Random();
             //TODO load Dictionary
             try
             {
                 //TODO change this to loading from DB I guess?
-                PokemonTypes = JsonConvert.DeserializeObject<List<PokemonType>>(File.ReadAllText(Path.Combine(NadekoBot.DataDir, "pokemontypes.json")));
-                PokemonMoves = JsonConvert.DeserializeObject<List<PokemonMove>>(File.ReadAllText(Path.Combine(NadekoBot.DataDir, "pokemonmoves.json")));
+                PokemonTypes = JsonConvert.DeserializeObject<List<PokemonType>>(File.ReadAllText(Path.Combine(DataDir, "pokemontypes.json")));
+                PokemonMoves = JsonConvert.DeserializeObject<List<PokemonMove>>(File.ReadAllText(Path.Combine(DataDir, "pokemonmoves.json")));
             }
             catch (Exception e)
             {
@@ -132,26 +135,36 @@ namespace NadekoBot.Modules.Pokemon
                 Dictionary.TryUpdate((long)guild.Id, newServer, newServer);
             }
         }
+
         [LocalizedCommand, LocalizedDescription, LocalizedSummary]
         [RequireContext(ContextType.Guild)]
         public async Task Stats(IMessage msg, IGuildUser arg = null)
         {
-
-            var channel = msg.Channel as IGuildChannel;
-            var guild = channel.Guild;
+            var guild = (msg.Channel as IGuildChannel).Guild;
             var serverPlayers = Dictionary.GetOrAdd((long)guild.Id, new PokemonServer() { ServerId = (long)guild.Id }).Players;
             StringBuilder builder = new StringBuilder();
-            PokemonPlayer player = serverPlayers.GetOrAdd((arg ?? msg.Author).Id, GenerateNewPlayer); 
+            PokemonPlayer player = serverPlayers.GetOrAdd((arg ?? msg.Author).Id, GenerateNewPlayer);
             builder.AppendLine(string.Format("{0}'s Stats: ```xl", player));
             foreach (var p in player.Stats.GetType().GetProperties())
             {
                 //TODO consider typing it out for localization purposes
                 builder.AppendLine($"{p.Name} : {p.GetValue(player.Stats, null).ToString()}");
             }
-            builder.AppendLine(string.Format("Type : {0}",  player.PokemonType));
+            builder.AppendLine(string.Format("Type : {0}", player.PokemonType));
             if (player.Duelist != null)
-            builder.AppendLine(string.Format("Duelist : {0}", player.Duelist));
+                builder.AppendLine(string.Format("Duelist : {0}", player.Duelist));
             await msg.Reply(builder.AppendLine("```").ToString());
+        }
+
+        [LocalizedCommand, LocalizedDescription, LocalizedSummary]
+        [RequireContext(ContextType.Guild)]
+        public async Task Heal(IMessage msg, IGuildUser arg = null)
+        {
+            var guild = (msg.Channel as IGuildChannel).Guild;
+            var serverPlayers = Dictionary.GetOrAdd((long)guild.Id, new PokemonServer() { ServerId = (long)guild.Id }).Players;
+            var player = serverPlayers.GetOrAdd(arg?.Id ?? msg.Author.Id, GenerateNewPlayer);
+            //TODO add pay
+            
         }
 
         [LocalizedCommand, LocalizedDescription, LocalizedSummary]
@@ -173,17 +186,30 @@ namespace NadekoBot.Modules.Pokemon
             builder.Append("```");
             await msg.Reply(builder.ToString());
         }
-        
+
+        [LocalizedCommand, LocalizedDescription, LocalizedSummary]
+        [RequireContext(ContextType.Guild)]
+        public async Task StartDuel(IMessage msg, IGuildUser arg)
+        {
+            var guild = (msg.Channel as IGuildChannel).Guild;
+            var serverPlayers = Dictionary.GetOrAdd((long)guild.Id, new PokemonServer() { ServerId = (long)guild.Id }).Players;
+            PokemonPlayer player = serverPlayers.GetOrAdd(msg.Author.Id, GenerateNewPlayer);
+            PokemonPlayer target = serverPlayers.GetOrAdd(arg.Id, GenerateNewPlayer);
+
+        }
+
 
         public PokemonPlayer GenerateNewPlayer(long id)
         {
             var t = generateRandomType(id);
+            var hp = _rand.Next(80, 120);
             return new PokemonPlayer()
             {
                 UserId = id,
                 Stats = new PokemonStats()
                 {
-                    Health = _rand.Next(80, 120),
+                    Health = hp,
+                    MaxHealth = hp,
                     Agility = _rand.Next(10, 50),
                     Strength = _rand.Next(80, 120)
                 },
@@ -192,7 +218,7 @@ namespace NadekoBot.Modules.Pokemon
 
             };
         }
-
+        
         private PokemonType generateRandomType(long id)
         {
             return PokemonTypes[(int)(id % PokemonTypes.Count)];
@@ -211,7 +237,7 @@ namespace NadekoBot.Modules.Pokemon
             var selection = selectRange[_rand.Next(0, selectRange.Count)];
             dict.Add(selection, selection.PP);
             selectRange.AddRange(PokemonMoves.Where(m => !focus.Weaknesses.Contains(m.MoveType)));
-           
+
             for (int i = 0; i < 3; i++)
             {
                 selection = selectRange[_rand.Next(0, selectRange.Count)];
@@ -223,5 +249,5 @@ namespace NadekoBot.Modules.Pokemon
 
         private PokemonType GetPokemonType(string name) => PokemonTypes.FirstOrDefault(p => p.Name == name);
     }
-    
+
 }
