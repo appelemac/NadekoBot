@@ -17,14 +17,11 @@ namespace NadekoBot
     {
         public static CommandService Commands { get; private set; }
         public static DiscordSocketClient Client { get; private set; }
-        public static string DataDir { get; set; }
         public static BotConfiguration Config { get; private set; }
         public static Localization Localizer { get; private set; }
         public static BotCredentials Credentials { get; private set; }
         public async Task RunAsync(string[] args)
         {
-            //I'm adding this for now, though we'll be moving everything to DB
-            DataDir = Path.Combine(Directory.GetParent(typeof(NadekoBot).GetTypeInfo().Assembly.Location).FullName, "data");
             //create client
             Client = new DiscordSocketClient(new DiscordSocketConfig
             {
