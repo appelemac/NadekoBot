@@ -44,6 +44,4 @@ NadekoBot.sln.iml
 .idea/modules.xml
 NadekoBot/bin/Debug/data/config_xnaas.json
 *.dat
-.vs/restore.dg
-.vs/restore.dg
-*.dg
+.vs/
