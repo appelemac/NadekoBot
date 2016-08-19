@@ -12,7 +12,7 @@ using System.Text;
 namespace NadekoBot.Modules.Help
 {
     [Module("-", AppendSpace = false)]
-    public partial class HelpModule : DiscordModule
+    public partial class Help : DiscordModule
     {
         public string HelpString {
             get {
@@ -20,7 +20,7 @@ namespace NadekoBot.Modules.Help
                 return str + String.Format(str, NadekoBot.Credentials.ClientId);
             }
         }
-        public HelpModule(ILocalization loc, CommandService cmds, IBotConfiguration config, IDiscordClient client) : base(loc, cmds, config, client)
+        public Help(ILocalization loc, CommandService cmds, IBotConfiguration config, IDiscordClient client) : base(loc, cmds, config, client)
         {
         }
 
@@ -28,7 +28,7 @@ namespace NadekoBot.Modules.Help
         [RequireContext(ContextType.Guild)]
         public async Task Modules(IMessage imsg)
         {
-            var channel = imsg.Channel as IGuildChannel;
+            var channel = imsg.Channel as ITextChannel;
 
             await imsg.Channel.SendMessageAsync("`List of modules:` \n• " + string.Join("\n• ", _commands.Modules.Select(m => m.Name)) + $"\n`Type \"-commands module_name\" to get a list of commands in that module.`")
                                        .ConfigureAwait(false);
@@ -36,9 +36,9 @@ namespace NadekoBot.Modules.Help
 
         [LocalizedCommand, LocalizedDescription, LocalizedSummary]
         [RequireContext(ContextType.Guild)]
-        public async Task Commands(IMessage imsg, [Remainder] string module)
+        public async Task Commands(IMessage imsg, [Remainder] string module = null)
         {
-            var channel = imsg.Channel as IGuildChannel;
+            var channel = imsg.Channel as ITextChannel;
 
             module = module?.Trim().ToUpperInvariant();
             if (string.IsNullOrWhiteSpace(module))
@@ -66,9 +66,9 @@ namespace NadekoBot.Modules.Help
 
         [LocalizedCommand, LocalizedDescription, LocalizedSummary]
         [RequireContext(ContextType.Guild)]
-        public async Task Help(IMessage imsg, [Remainder] string comToFind)
+        public async Task H(IMessage imsg, [Remainder] string comToFind = null)
         {
-            var channel = imsg.Channel as IGuildChannel;
+            var channel = imsg.Channel as ITextChannel;
 
             comToFind = comToFind?.ToLowerInvariant();
             if (string.IsNullOrWhiteSpace(comToFind))
@@ -106,7 +106,7 @@ namespace NadekoBot.Modules.Help
             }
             helpstr = helpstr.Replace((await NadekoBot.Client.GetCurrentUserAsync()).Username , "@BotName");
 #if DEBUG
-            File.WriteAllText("../../../docs/Commands List.md", helpstr.ToString());
+            File.WriteAllText("../../../../../docs/Commands List.md", helpstr.ToString());
 #else
             File.WriteAllText("commandlist.md", helpstr.ToString());
 #endif
@@ -116,7 +116,7 @@ namespace NadekoBot.Modules.Help
         [RequireContext(ContextType.Guild)]
         public async Task Guide(IMessage imsg)
         {
-            var channel = imsg.Channel as IGuildChannel;
+            var channel = imsg.Channel as ITextChannel;
 
             await imsg.Channel.SendMessageAsync(
 @"**LIST OF COMMANDS**: <http://nadekobot.readthedocs.io/en/latest/Commands%20List/>
@@ -127,7 +127,7 @@ namespace NadekoBot.Modules.Help
         [RequireContext(ContextType.Guild)]
         public async Task Donate(IMessage imsg)
         {
-            var channel = imsg.Channel as IGuildChannel;
+            var channel = imsg.Channel as ITextChannel;
 
             await imsg.Channel.SendMessageAsync(
 $@"You can support the project on patreon. <https://patreon.com/nadekobot> or

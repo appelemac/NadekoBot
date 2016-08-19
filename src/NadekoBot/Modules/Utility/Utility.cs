@@ -15,16 +15,16 @@ namespace NadekoBot.Modules.Utility
 {
 
     [Module(".", AppendSpace = false)]
-    public partial class UtilityModule : DiscordModule
+    public partial class Utility : DiscordModule
     {
-        public UtilityModule(ILocalization loc, CommandService cmds, IBotConfiguration config, IDiscordClient client) : base(loc, cmds, config, client)
+        public Utility(ILocalization loc, CommandService cmds, IBotConfiguration config, IDiscordClient client) : base(loc, cmds, config, client)
         {
 
         }
 
         [LocalizedCommand, LocalizedDescription, LocalizedSummary]
         [RequireContext(ContextType.Guild)]
-        public async Task WhoPlays(IMessage imsg, [Remainder] string game)
+        public async Task WhoPlays(IMessage imsg, [Remainder] string game = null)
         {
             var chnl = (IGuildChannel)imsg.Channel;
             game = game.Trim().ToUpperInvariant();
@@ -44,11 +44,11 @@ namespace NadekoBot.Modules.Utility
 
         [LocalizedCommand, LocalizedDescription, LocalizedSummary]
         [RequireContext(ContextType.Guild)]
-        public async Task InRole(IMessage imsg, [Remainder] string roles)
+        public async Task InRole(IMessage imsg, [Remainder] string roles = null)
         {
             if (string.IsNullOrWhiteSpace(roles))
                 return;
-            var channel = imsg.Channel as IGuildChannel;
+            var channel = imsg.Channel as ITextChannel;
             var arg = roles.Split(',').Select(r => r.Trim().ToUpperInvariant());
             string send = _l["`Here is a list of users in a specfic role:`"];
             foreach (var roleStr in arg.Where(str => !string.IsNullOrWhiteSpace(str) && str != "@EVERYONE" && str != "EVERYONE"))
@@ -110,22 +110,31 @@ namespace NadekoBot.Modules.Utility
         [RequireContext(ContextType.Guild)]
         public async Task ServerId(IMessage msg)
         {
-            await msg.Reply($"This server's ID is {(msg.Channel as IGuildChannel).Guild.Id}");
+            await msg.Reply($"This server's ID is {(msg.Channel as ITextChannel).Guild.Id}");
         }
 
         [LocalizedCommand, LocalizedDescription, LocalizedSummary]
         [RequireContext(ContextType.Guild)]
         public async Task Roles(IMessage msg, IGuildUser target = null)
         {
-            var guild = (msg.Channel as IGuildChannel).Guild;
+            var guild = (msg.Channel as ITextChannel).Guild;
             if (target != null)
             {
                 await msg.Reply($"`List of roles for **{target.Username}**:` \n• " + string.Join("\n• ", target.Roles.Except(new[] { guild.EveryoneRole })));
             }
             else
             {
-                await msg.Reply("`List of roles:` \n• " + string.Join("\n• ", (msg.Channel as IGuildChannel).Guild.Roles.Except(new[] { guild.EveryoneRole })));
+                await msg.Reply("`List of roles:` \n• " + string.Join("\n• ", (msg.Channel as ITextChannel).Guild.Roles.Except(new[] { guild.EveryoneRole })));
             }
+        }
+
+        [LocalizedCommand, LocalizedDescription, LocalizedSummary]
+        [RequireContext(ContextType.Guild)]
+        public async Task Stats(IMessage imsg)
+        {
+            var channel = imsg.Channel as ITextChannel;
+
+            await channel.SendMessageAsync(await NadekoBot.Stats.Print());
         }
     }
 }
