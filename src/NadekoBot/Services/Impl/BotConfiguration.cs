@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace NadekoBot.Services.Impl
 {
     public class BotConfiguration : IBotConfiguration
     {
+        internal Task _8BallResponses;
+
         public HashSet<ulong> BlacklistedChannels { get; set; } = new HashSet<ulong>();
 
         public HashSet<ulong> BlacklistedServers { get; set; } = new HashSet<ulong>();

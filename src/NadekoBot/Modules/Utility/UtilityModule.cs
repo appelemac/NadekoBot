@@ -127,65 +127,6 @@ namespace NadekoBot.Modules.Utility
                 await msg.Reply("`List of roles:` \n• " + string.Join("\n• ", (msg.Channel as IGuildChannel).Guild.Roles.Except(new[] { guild.EveryoneRole })));
             }
         }
-
-        [LocalizedCommand, LocalizedDescription, LocalizedSummary]
-        [RequireContext(ContextType.Guild)]
-        public async Task Prune(IMessage msg, [Remainder] string target = null)
-        {
-            var channel = msg.Channel as IGuildChannel;
-
-            var user = await channel.Guild.GetCurrentUserAsync();
-            if (string.IsNullOrWhiteSpace(target))
-            {
-
-                var enumerable = (await msg.Channel.GetMessagesAsync(limit: 100)).Where(x => x.Author.Id == user.Id);
-                await msg.Channel.DeleteMessagesAsync(enumerable);
-                return;
-            }
-            target = target.Trim();
-            if (!user.GetPermissions(channel).ManageMessages)
-            {
-                await msg.Reply("Don't have permissions to manage messages in channel");
-                return;
-            }
-            int count;
-            if (int.TryParse(target, out count))
-            {
-                while (count > 0)
-                {
-                    int limit = (count < 100) ? count : 100;
-                    var enumerable = (await msg.Channel.GetMessagesAsync(limit: limit));
-                    await msg.Channel.DeleteMessagesAsync(enumerable);
-                    if (enumerable.Count < limit) break;
-                    count -= limit;
-                }
-            }
-            else if (msg.MentionedUsers.Count > 0)
-            {
-                var toDel = new List<IMessage>();
-
-                var match = Regex.Match(target, @"\s(\d+)\s");
-                if (match.Success)
-                {
-                    int.TryParse(match.Groups[1].Value, out count);
-                    var messages = new List<IMessage>(count);
-
-                    while (count > 0)
-                    {
-                        var toAdd = await msg.Channel.GetMessagesAsync(limit: count < 100 ? count : 100);
-                        messages.AddRange(toAdd);
-                        count -= toAdd.Count;
-                    }
-
-                    foreach (var mention in msg.MentionedUsers)
-                    {
-                        toDel.AddRange(messages.Where(m => m.Author.Id == mention.Id));
-                    }
-                    //TODO check if limit == 100 or there is no limit
-                    await msg.Channel.DeleteMessagesAsync(toDel);
-                }
-            }
-        }
     }
 }
 

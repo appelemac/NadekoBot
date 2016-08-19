@@ -1,7 +1,6 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using NadekoBot.Modules.Utility;
 using NadekoBot.Services;
 using NadekoBot.Services.Impl;
 using System;
@@ -20,6 +19,7 @@ namespace NadekoBot
         public static BotConfiguration Config { get; private set; }
         public static Localization Localizer { get; private set; }
         public static BotCredentials Credentials { get; private set; }
+        private static YoutubeService Youtube { get; set; }
         public async Task RunAsync(string[] args)
         {
             //create client
@@ -32,16 +32,19 @@ namespace NadekoBot
             });
 
             //initialize Services
+            Credentials = new BotCredentials();
             Commands = new CommandService();
             Config = new BotConfiguration();
             Localizer = new Localization();
             Credentials = new BotCredentials();
+            Youtube = new YoutubeService();
             //setup DI
             var depMap = new DependencyMap();
             depMap.Add<ILocalization>(Localizer);
             depMap.Add<IBotConfiguration>(Config);
             depMap.Add<IDiscordClient>(Client);
             depMap.Add<CommandService>(Commands);
+            depMap.Add<IYoutubeService>(Youtube);
 
             //connect
             await Client.LoginAsync(TokenType.Bot, "MTE5Nzc3MDIxMzE5NTc3NjEw.CpGoCA.yQBJbLWurrjSk7IlGpGzBm-tPTg");
