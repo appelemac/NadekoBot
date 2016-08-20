@@ -39,7 +39,7 @@
 
 //                var controls = AnnouncementsDictionary[e.Server.Id];
 //                var channel = NadekoBot.Client.GetChannel(controls.ByeChannel);
-//                var msg = controls.ByeText.Replace("%user%", "**" + e.User.Name + "**").Trim();
+//                var msg = controls.ByeText.Replace("%user%", "**" + imsg.Author.Username + "**").Trim();
 //                if (string.IsNullOrEmpty(msg))
 //                    return;
 
@@ -48,7 +48,7 @@
 //                    Greeted++;
 //                    try
 //                    {
-//                        await e.User.SendMessage($"`Farewell Message From {e.Server?.Name}`\n" + msg).ConfigureAwait(false);
+//                        await imsg.Author.SendMessageAsync($"`Farewell Message From {e.Server?.Name}`\n" + msg).ConfigureAwait(false);
 
 //                    }
 //                    catch { }
@@ -57,7 +57,7 @@
 //                {
 //                    if (channel == null) return;
 //                    Greeted++;
-//                    var toDelete = await channel.SendMessage(msg).ConfigureAwait(false);
+//                    var toDelete = await channel.SendMessageAsync(msg).ConfigureAwait(false);
 //                    if (e.Server.CurrentUser.GetPermissions(channel).ManageMessages && controls.DeleteGreetMessages)
 //                    {
 //                        await Task.Delay(30000).ConfigureAwait(false); // 5 minutes
@@ -78,19 +78,19 @@
 //                var controls = AnnouncementsDictionary[e.Server.Id];
 //                var channel = NadekoBot.Client.GetChannel(controls.GreetChannel);
 
-//                var msg = controls.GreetText.Replace("%user%", e.User.Mention).Trim();
+//                var msg = controls.GreetText.Replace("%user%", imsg.Author.Mention).Trim();
 //                if (string.IsNullOrEmpty(msg))
 //                    return;
 //                if (controls.GreetPM)
 //                {
 //                    Greeted++;
-//                    await e.User.SendMessage($"`Welcome Message From {e.Server.Name}`\n" + msg).ConfigureAwait(false);
+//                    await imsg.Author.SendMessageAsync($"`Welcome Message From {e.Server.Name}`\n" + msg).ConfigureAwait(false);
 //                }
 //                else
 //                {
 //                    if (channel == null) return;
 //                    Greeted++;
-//                    var toDelete = await channel.SendMessage(msg).ConfigureAwait(false);
+//                    var toDelete = await channel.SendMessageAsync(msg).ConfigureAwait(false);
 //                    if (e.Server.CurrentUser.GetPermissions(channel).ManageMessages && controls.DeleteGreetMessages)
 //                    {
 //                        await Task.Delay(30000).ConfigureAwait(false); // 5 minutes
@@ -211,26 +211,26 @@
 //                .Description($"Toggles automatic deletion of greet and bye messages. **Needs Manage Server Permissions.**| `{Prefix}grdel`")
 //                .Do(async e =>
 //                {
-//                    if (!e.User.ServerPermissions.ManageServer) return;
+//                    if (!imsg.Author.ServerPermissions.ManageServer) return;
 //                    var ann = AnnouncementsDictionary.GetOrAdd(e.Server.Id, new AnnounceControls(e.Server.Id));
 
 //                    if (ann.ToggleDelete())
-//                        await imsg.Channel.SendMessageAsync("`Automatic deletion of greet and bye messages has been enabled.`").ConfigureAwait(false);
+//                        await channel.SendMessageAsync("`Automatic deletion of greet and bye messages has been enabled.`").ConfigureAwait(false);
 //                    else
-//                        await imsg.Channel.SendMessageAsync("`Automatic deletion of greet and bye messages has been disabled.`").ConfigureAwait(false);
+//                        await channel.SendMessageAsync("`Automatic deletion of greet and bye messages has been disabled.`").ConfigureAwait(false);
 //                });
 
 //            cgb.CreateCommand(Module.Prefix + "greet")
 //                .Description($"Toggles anouncements on the current channel when someone joins the server. **Needs Manage Server Permissions.**| `{Prefix}greet`")
 //                .Do(async e =>
 //                {
-//                    if (!e.User.ServerPermissions.ManageServer) return;
+//                    if (!imsg.Author.ServerPermissions.ManageServer) return;
 //                    var ann = AnnouncementsDictionary.GetOrAdd(e.Server.Id, new AnnounceControls(e.Server.Id));
 
 //                    if (ann.ToggleGreet(e.Channel.Id))
-//                        await imsg.Channel.SendMessageAsync("Greet announcements enabled on this channel.").ConfigureAwait(false);
+//                        await channel.SendMessageAsync("Greet announcements enabled on this channel.").ConfigureAwait(false);
 //                    else
-//                        await imsg.Channel.SendMessageAsync("Greet announcements disabled.").ConfigureAwait(false);
+//                        await channel.SendMessageAsync("Greet announcements disabled.").ConfigureAwait(false);
 //                });
 
 //            cgb.CreateCommand(Module.Prefix + "greetmsg")
@@ -238,32 +238,32 @@
 //                .Parameter("msg", ParameterType.Unparsed)
 //                .Do(async e =>
 //                {
-//                    if (!e.User.ServerPermissions.ManageServer) return;
+//                    if (!imsg.Author.ServerPermissions.ManageServer) return;
 //                    var ann = AnnouncementsDictionary.GetOrAdd(e.Server.Id, new AnnounceControls(e.Server.Id));
 //                    if (string.IsNullOrWhiteSpace(e.GetArg("msg")))
 //                    {
-//                        await imsg.Channel.SendMessageAsync("`Current greet message:` " + ann.GreetText);
+//                        await channel.SendMessageAsync("`Current greet message:` " + ann.GreetText);
 //                        return;
 //                    }
 
 
 //                    ann.GreetText = e.GetArg("msg");
-//                    await imsg.Channel.SendMessageAsync("New greet message set.").ConfigureAwait(false);
+//                    await channel.SendMessageAsync("New greet message set.").ConfigureAwait(false);
 //                    if (!ann.Greet)
-//                        await imsg.Channel.SendMessageAsync("Enable greet messsages by typing `.greet`").ConfigureAwait(false);
+//                        await channel.SendMessageAsync("Enable greet messsages by typing `.greet`").ConfigureAwait(false);
 //                });
 
 //            cgb.CreateCommand(Module.Prefix + "bye")
 //                .Description($"Toggles anouncements on the current channel when someone leaves the server. | `{Prefix}bye`")
 //                .Do(async e =>
 //                {
-//                    if (!e.User.ServerPermissions.ManageServer) return;
+//                    if (!imsg.Author.ServerPermissions.ManageServer) return;
 //                    var ann = AnnouncementsDictionary.GetOrAdd(e.Server.Id, new AnnounceControls(e.Server.Id));
 
 //                    if (ann.ToggleBye(e.Channel.Id))
-//                        await imsg.Channel.SendMessageAsync("Bye announcements enabled on this channel.").ConfigureAwait(false);
+//                        await channel.SendMessageAsync("Bye announcements enabled on this channel.").ConfigureAwait(false);
 //                    else
-//                        await imsg.Channel.SendMessageAsync("Bye announcements disabled.").ConfigureAwait(false);
+//                        await channel.SendMessageAsync("Bye announcements disabled.").ConfigureAwait(false);
 //                });
 
 //            cgb.CreateCommand(Module.Prefix + "byemsg")
@@ -271,50 +271,50 @@
 //                .Parameter("msg", ParameterType.Unparsed)
 //                .Do(async e =>
 //                {
-//                    if (!e.User.ServerPermissions.ManageServer) return;
+//                    if (!imsg.Author.ServerPermissions.ManageServer) return;
 //                    var ann = AnnouncementsDictionary.GetOrAdd(e.Server.Id, new AnnounceControls(e.Server.Id));
 //                    if (string.IsNullOrWhiteSpace(e.GetArg("msg")))
 //                    {
-//                        await imsg.Channel.SendMessageAsync("`Current bye message:` " + ann.ByeText);
+//                        await channel.SendMessageAsync("`Current bye message:` " + ann.ByeText);
 //                        return;
 //                    }
 
 //                    ann.ByeText = e.GetArg("msg");
-//                    await imsg.Channel.SendMessageAsync("New bye message set.").ConfigureAwait(false);
+//                    await channel.SendMessageAsync("New bye message set.").ConfigureAwait(false);
 //                    if (!ann.Bye)
-//                        await imsg.Channel.SendMessageAsync("Enable bye messsages by typing `.bye`.").ConfigureAwait(false);
+//                        await channel.SendMessageAsync("Enable bye messsages by typing `.bye`.").ConfigureAwait(false);
 //                });
 
 //            cgb.CreateCommand(Module.Prefix + "byepm")
 //                .Description($"Toggles whether the good bye messages will be sent in a PM or in the text channel. **Needs Manage Server Permissions.**| `{Prefix}byepm`")
 //                .Do(async e =>
 //                {
-//                    if (!e.User.ServerPermissions.ManageServer) return;
+//                    if (!imsg.Author.ServerPermissions.ManageServer) return;
 //                    var ann = AnnouncementsDictionary.GetOrAdd(e.Server.Id, new AnnounceControls(e.Server.Id));
 
 
 //                    if (ann.ToggleByePM())
-//                        await imsg.Channel.SendMessageAsync("Bye messages will be sent in a PM from now on.\n ⚠ Keep in mind this might fail if the user and the bot have no common servers after the user leaves.").ConfigureAwait(false);
+//                        await channel.SendMessageAsync("Bye messages will be sent in a PM from now on.\n ⚠ Keep in mind this might fail if the user and the bot have no common servers after the user leaves.").ConfigureAwait(false);
 //                    else
-//                        await imsg.Channel.SendMessageAsync("Bye messages will be sent in a bound channel from now on.").ConfigureAwait(false);
+//                        await channel.SendMessageAsync("Bye messages will be sent in a bound channel from now on.").ConfigureAwait(false);
 //                    if (!ann.Bye)
-//                        await imsg.Channel.SendMessageAsync("Enable bye messsages by typing `.bye`, and set the bye message using `.byemsg`").ConfigureAwait(false);
+//                        await channel.SendMessageAsync("Enable bye messsages by typing `.bye`, and set the bye message using `.byemsg`").ConfigureAwait(false);
 //                });
 
 //            cgb.CreateCommand(Module.Prefix + "greetpm")
 //                .Description($"Toggles whether the greet messages will be sent in a PM or in the text channel. **Needs Manage Server Permissions.**| `{Prefix}greetpm`")
 //                .Do(async e =>
 //                {
-//                    if (!e.User.ServerPermissions.ManageServer) return;
+//                    if (!imsg.Author.ServerPermissions.ManageServer) return;
 
 //                    var ann = AnnouncementsDictionary.GetOrAdd(e.Server.Id, new AnnounceControls(e.Server.Id));
 
 //                    if (ann.ToggleGreetPM())
-//                        await imsg.Channel.SendMessageAsync("Greet messages will be sent in a PM from now on.").ConfigureAwait(false);
+//                        await channel.SendMessageAsync("Greet messages will be sent in a PM from now on.").ConfigureAwait(false);
 //                    else
-//                        await imsg.Channel.SendMessageAsync("Greet messages will be sent in a bound channel from now on.").ConfigureAwait(false);
+//                        await channel.SendMessageAsync("Greet messages will be sent in a bound channel from now on.").ConfigureAwait(false);
 //                    if (!ann.Greet)
-//                        await imsg.Channel.SendMessageAsync("Enable greet messsages by typing `.greet`, and set the greet message using `.greetmsg`").ConfigureAwait(false);
+//                        await channel.SendMessageAsync("Enable greet messsages by typing `.greet`, and set the greet message using `.greetmsg`").ConfigureAwait(false);
 //                });
 //        }
 //    }

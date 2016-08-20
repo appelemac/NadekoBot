@@ -15,13 +15,18 @@ namespace NadekoBot.Modules.Searches.Commands
         public class PokemonSearchCommands
         {
             //todo DB
-            private static Dictionary<string, SearchPokemon> pokemons;
-            private static Dictionary<string, SearchPokemonAbility> pokemonAbilities;
+            private static Dictionary<string, SearchPokemon> pokemons = new Dictionary<string, SearchPokemon>();
+            private static Dictionary<string, SearchPokemonAbility> pokemonAbilities = new Dictionary<string, SearchPokemonAbility>();
+
+            public const string PokemonAbilitiesFile = "data/pokemon/pokemon_abilities.json";
+
+            public const string PokemonListFile = "data/pokemon/pokemon_list.json";
 
             public PokemonSearchCommands()
             {
-                pokemons = JsonConvert.DeserializeObject<Dictionary<string, SearchPokemon>>(File.ReadAllText("data/pokemon/pokemon_list.json"));
-                pokemonAbilities = JsonConvert.DeserializeObject<Dictionary<string, SearchPokemonAbility>>(File.ReadAllText("data/pokemon/pokemon_abilities.json"));
+                if(File.Exists(PokemonListFile))
+                pokemons = JsonConvert.DeserializeObject<Dictionary<string, SearchPokemon>>(File.ReadAllText(PokemonListFile));
+                pokemonAbilities = JsonConvert.DeserializeObject<Dictionary<string, SearchPokemonAbility>>(File.ReadAllText(PokemonAbilitiesFile));
             }
 
             [LocalizedCommand, LocalizedDescription, LocalizedSummary]
@@ -38,11 +43,11 @@ namespace NadekoBot.Modules.Searches.Commands
                 {
                     if (kvp.Key.ToUpperInvariant() == pokemon.ToUpperInvariant())
                     {
-                        await imsg.Channel.SendMessageAsync($"`Stats for \"{kvp.Key}\" pokemon:`\n{kvp.Value}");
+                        await channel.SendMessageAsync($"`Stats for \"{kvp.Key}\" pokemon:`\n{kvp.Value}");
                         return;
                     }
                 }
-                await imsg.Channel.SendMessageAsync("`No pokemon found.`");
+                await channel.SendMessageAsync("`No pokemon found.`");
             }
 
             [LocalizedCommand, LocalizedDescription, LocalizedSummary]
@@ -58,11 +63,11 @@ namespace NadekoBot.Modules.Searches.Commands
                 {
                     if (kvp.Key.ToUpperInvariant() == ability)
                     {
-                        await imsg.Channel.SendMessageAsync($"`Info for \"{kvp.Key}\" ability:`\n{kvp.Value}");
+                        await channel.SendMessageAsync($"`Info for \"{kvp.Key}\" ability:`\n{kvp.Value}");
                         return;
                     }
                 }
-                await imsg.Channel.SendMessageAsync("`No ability found.`");
+                await channel.SendMessageAsync("`No ability found.`");
             }
         }
     }

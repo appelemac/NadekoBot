@@ -31,7 +31,7 @@ namespace NadekoBot.Modules.CustomReactions
                         }else return rng.Next().ToString();
                         } },
                     {new Regex("%mention%"), (e,m) => NadekoBot.BotMention },
-                    {new Regex("%user%"), (e,m) => e.User.Mention },
+                    {new Regex("%user%"), (e,m) => imsg.Author.Mention },
                     {new Regex("%target%"), (e,m) => e.GetArg("args")?.Trim() ?? "" },
 
                  };
@@ -58,7 +58,7 @@ namespace NadekoBot.Modules.CustomReactions
                               commandFuncs.Keys.ForEach(key => str = key.Replace(str, m => commandFuncs[key](e, m)));
 
 
-                              await imsg.Channel.SendMessageAsync(str).ConfigureAwait(false);
+                              await channel.SendMessageAsync(str).ConfigureAwait(false);
                           });
                  }
              });

@@ -61,7 +61,7 @@
 //                    if (ch == null)
 //                        return;
 
-//                    await ch.SendMessage(
+//                    await ch.SendMessageAsync(
 //                        replacements.Aggregate(NadekoBot.Config.RemindMessageFormat,
 //                        (cur, replace) => cur.Replace(replace.Key, replace.Value(r)))
 //                            ).ConfigureAwait(false); //it works trust me
@@ -100,7 +100,7 @@
 //                    if (meorchStr == "ME")
 //                    {
 //                        isPrivate = true;
-//                        ch = await e.User.CreatePMChannel().ConfigureAwait(false);
+//                        ch = await imsg.Author.CreatePMChannel().ConfigureAwait(false);
 //                    }
 //                    else if (meorchStr == "HERE")
 //                    {
@@ -113,7 +113,7 @@
 
 //                    if (ch == null)
 //                    {
-//                        await imsg.Channel.SendMessageAsync($"{e.User.Mention} Something went wrong (channel cannot be found) ;(").ConfigureAwait(false);
+//                        await channel.SendMessageAsync($"{imsg.Author.Mention} Something went wrong (channel cannot be found) ;(").ConfigureAwait(false);
 //                        return;
 //                    }
 
@@ -123,7 +123,7 @@
 
 //                    if (m.Length == 0)
 //                    {
-//                        await imsg.Channel.SendMessageAsync("Not a valid time format blablabla").ConfigureAwait(false);
+//                        await channel.SendMessageAsync("Not a valid time format blablabla").ConfigureAwait(false);
 //                        return;
 //                    }
 
@@ -148,7 +148,7 @@
 //                            (groupName == "hours" && value > 23) ||
 //                            (groupName == "minutes" && value > 59))
 //                        {
-//                            await imsg.Channel.SendMessageAsync($"Invalid {groupName} value.").ConfigureAwait(false);
+//                            await channel.SendMessageAsync($"Invalid {groupName} value.").ConfigureAwait(false);
 //                            return;
 //                        }
 //                        else
@@ -168,14 +168,14 @@
 //                        IsPrivate = isPrivate,
 //                        When = time,
 //                        Message = e.GetArg("message"),
-//                        UserId = (long)e.User.Id,
+//                        UserId = (long)imsg.Author.Id,
 //                        ServerId = (long)e.Server.Id
 //                    };
 //                    DbHandler.Instance.Connection.Insert(rem);
 
 //                    reminders.Add(StartNewReminder(rem));
 
-//                    await imsg.Channel.SendMessageAsync($"⏰ I will remind \"{ch.Name}\" to \"{e.GetArg("message").ToString()}\" in {output}. ({time:d.M.yyyy.} at {time:HH:mm})").ConfigureAwait(false);
+//                    await channel.SendMessageAsync($"⏰ I will remind \"{ch.Name}\" to \"{e.GetArg("message").ToString()}\" in {output}. ({time:d.M.yyyy.} at {time:HH:mm})").ConfigureAwait(false);
 //                });
 //            cgb.CreateCommand(Module.Prefix + "remindmsg")
 //                .Description("Sets message for when the remind is triggered. " +
@@ -190,7 +190,7 @@
 //                        return;
 
 //                    NadekoBot.Config.RemindMessageFormat = arg;
-//                    await imsg.Channel.SendMessageAsync("`New remind message set.`");
+//                    await channel.SendMessageAsync("`New remind message set.`");
 //                });
 //        }
 //    }

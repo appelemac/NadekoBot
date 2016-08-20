@@ -30,7 +30,7 @@ namespace NadekoBot.Modules.Administration
         //{
         //    var channel = imsg.Channel as ITextChannel;
 
-        //    await imsg.Channel.SendMessageAsync("`Restarting in 2 seconds...`");
+        //    await channel.SendMessageAsync("`Restarting in 2 seconds...`");
         //    await Task.Delay(2000);
         //    System.Diagnostics.Process.Start(System.Reflection.Assembly.GetEntryAssembly().Location);
         //    Environment.Exit(0);
@@ -48,9 +48,9 @@ namespace NadekoBot.Modules.Administration
         //    conf.AutoDeleteMessagesOnCommand = !conf.AutoDeleteMessagesOnCommand;
         //    await Classes.JSONModels.ConfigHandler.SaveConfig().ConfigureAwait(false);
         //    if (conf.AutoDeleteMessagesOnCommand)
-        //        await imsg.Channel.SendMessageAsync("❗`Now automatically deleting successfull command invokations.`");
+        //        await channel.SendMessageAsync("❗`Now automatically deleting successfull command invokations.`");
         //    else
-        //        await imsg.Channel.SendMessageAsync("❗`Stopped automatic deletion of successfull command invokations.`");
+        //        await channel.SendMessageAsync("❗`Stopped automatic deletion of successfull command invokations.`");
         //}
 
         [LocalizedCommand, LocalizedDescription, LocalizedSummary]
@@ -62,11 +62,11 @@ namespace NadekoBot.Modules.Administration
             try
             {
                 await usr.AddRolesAsync(role).ConfigureAwait(false);
-                await imsg.Channel.SendMessageAsync($"Successfully added role **{role.Name}** to user **{usr.Username}**").ConfigureAwait(false);
+                await channel.SendMessageAsync($"Successfully added role **{role.Name}** to user **{usr.Username}**").ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                await imsg.Channel.SendMessageAsync("Failed to add roles. Bot has insufficient permissions.\n").ConfigureAwait(false);
+                await channel.SendMessageAsync("Failed to add roles. Bot has insufficient permissions.\n").ConfigureAwait(false);
                 Console.WriteLine(ex.ToString());
             }
         }
@@ -76,14 +76,15 @@ namespace NadekoBot.Modules.Administration
         [RequirePermission(GuildPermission.ManageRoles)]
         public async Task Removerole(IMessage imsg, IGuildUser usr, [Remainder] IRole role)
         {
+            var channel = imsg.Channel as ITextChannel;
             try
             {
                 await usr.RemoveRolesAsync(role).ConfigureAwait(false);
-                await imsg.Channel.SendMessageAsync($"Successfully removed role **{role.Name}** from user **{usr.Username}**").ConfigureAwait(false);
+                await channel.SendMessageAsync($"Successfully removed role **{role.Name}** from user **{usr.Username}**").ConfigureAwait(false);
             }
             catch
             {
-                await imsg.Channel.SendMessageAsync("Failed to remove roles. Most likely reason: Insufficient permissions.").ConfigureAwait(false);
+                await channel.SendMessageAsync("Failed to remove roles. Most likely reason: Insufficient permissions.").ConfigureAwait(false);
             }
         }
 
@@ -97,15 +98,15 @@ namespace NadekoBot.Modules.Administration
             {
                 if (roleToEdit.Position > (await channel.Guild.GetCurrentUserAsync().ConfigureAwait(false)).Roles.Max(r => r.Position))
                 {
-                    await imsg.Channel.SendMessageAsync("You can't edit roles higher than your highest role.").ConfigureAwait(false);
+                    await channel.SendMessageAsync("You can't edit roles higher than your highest role.").ConfigureAwait(false);
                     return;
                 }
                 await roleToEdit.ModifyAsync(g => g.Name = newname).ConfigureAwait(false);
-                await imsg.Channel.SendMessageAsync("Role renamed.").ConfigureAwait(false);
+                await channel.SendMessageAsync("Role renamed.").ConfigureAwait(false);
             }
             catch (Exception)
             {
-                await imsg.Channel.SendMessageAsync("Failed to rename role. Probably insufficient permissions.").ConfigureAwait(false);
+                await channel.SendMessageAsync("Failed to rename role. Probably insufficient permissions.").ConfigureAwait(false);
             }
         }
 
@@ -119,11 +120,11 @@ namespace NadekoBot.Modules.Administration
             try
             {
                 await user.RemoveRolesAsync(user.Roles).ConfigureAwait(false);
-                await imsg.Channel.SendMessageAsync($"Successfully removed **all** roles from user **{user.Username}**").ConfigureAwait(false);
+                await channel.SendMessageAsync($"Successfully removed **all** roles from user **{user.Username}**").ConfigureAwait(false);
             }
             catch
             {
-                await imsg.Channel.SendMessageAsync("Failed to remove roles. Most likely reason: Insufficient permissions.").ConfigureAwait(false);
+                await channel.SendMessageAsync("Failed to remove roles. Most likely reason: Insufficient permissions.").ConfigureAwait(false);
             }
         }
 
@@ -140,11 +141,11 @@ namespace NadekoBot.Modules.Administration
             try
             {
                 var r = await channel.Guild.CreateRoleAsync(roleName).ConfigureAwait(false);
-                await imsg.Channel.SendMessageAsync($"Successfully created role **{r.Name}**.").ConfigureAwait(false);
+                await channel.SendMessageAsync($"Successfully created role **{r.Name}**.").ConfigureAwait(false);
             }
             catch (Exception)
             {
-                await imsg.Channel.SendMessageAsync(":warning: Unspecified error.").ConfigureAwait(false);
+                await channel.SendMessageAsync(":warning: Unspecified error.").ConfigureAwait(false);
             }
         }
 
@@ -157,7 +158,7 @@ namespace NadekoBot.Modules.Administration
 
             if (args.Count() != 2 && args.Count() != 4)
             {
-                await imsg.Channel.SendMessageAsync("The parameters are invalid.").ConfigureAwait(false);
+                await channel.SendMessageAsync("The parameters are invalid.").ConfigureAwait(false);
                 return;
             }
             var roleName = args[0].ToUpperInvariant();
@@ -165,7 +166,7 @@ namespace NadekoBot.Modules.Administration
 
             if (role == null)
             {
-                await imsg.Channel.SendMessageAsync("That role does not exist.").ConfigureAwait(false);
+                await channel.SendMessageAsync("That role does not exist.").ConfigureAwait(false);
                 return;
             }
             try
@@ -178,11 +179,11 @@ namespace NadekoBot.Modules.Administration
                 var blue = Convert.ToByte(rgb ? int.Parse(args[3]) : Convert.ToInt32(arg1.Substring(4, 2), 16));
                 
                 await role.ModifyAsync(r => r.Color = new Color(red, green, blue).RawValue).ConfigureAwait(false);
-                await imsg.Channel.SendMessageAsync($"Role {role.Name}'s color has been changed.").ConfigureAwait(false);
+                await channel.SendMessageAsync($"Role {role.Name}'s color has been changed.").ConfigureAwait(false);
             }
             catch (Exception)
             {
-                await imsg.Channel.SendMessageAsync("Error occured, most likely invalid parameters or insufficient permissions.").ConfigureAwait(false);
+                await channel.SendMessageAsync("Error occured, most likely invalid parameters or insufficient permissions.").ConfigureAwait(false);
             }
         }
 
@@ -205,11 +206,11 @@ namespace NadekoBot.Modules.Administration
             {
                 await channel.Guild.AddBanAsync(user, 7).ConfigureAwait(false);
 
-                await imsg.Channel.SendMessageAsync("Banned user " + user.Username + " Id: " + user.Id).ConfigureAwait(false);
+                await channel.SendMessageAsync("Banned user " + user.Username + " Id: " + user.Id).ConfigureAwait(false);
             }
             catch
             {
-                await imsg.Channel.SendMessageAsync("Error. Most likely I don't have sufficient permissions.").ConfigureAwait(false);
+                await channel.SendMessageAsync("Error. Most likely I don't have sufficient permissions.").ConfigureAwait(false);
             }
         }
 
@@ -231,11 +232,11 @@ namespace NadekoBot.Modules.Administration
                 await channel.Guild.AddBanAsync(user, 7).ConfigureAwait(false);
                 await channel.Guild.RemoveBanAsync(user).ConfigureAwait(false);
 
-                await imsg.Channel.SendMessageAsync("Soft-Banned user " + user.Username + " Id: " + user.Id).ConfigureAwait(false);
+                await channel.SendMessageAsync("Soft-Banned user " + user.Username + " Id: " + user.Id).ConfigureAwait(false);
             }
             catch
             {
-                await imsg.Channel.SendMessageAsync("Error. Most likely I don't have sufficient permissions.").ConfigureAwait(false);
+                await channel.SendMessageAsync("Error. Most likely I don't have sufficient permissions.").ConfigureAwait(false);
             }
         }
 
@@ -247,7 +248,7 @@ namespace NadekoBot.Modules.Administration
 
             if (user == null)
             {
-                await imsg.Channel.SendMessageAsync("User not found.").ConfigureAwait(false);
+                await channel.SendMessageAsync("User not found.").ConfigureAwait(false);
                 return;
             }
             if (!string.IsNullOrWhiteSpace(msg))
@@ -259,11 +260,11 @@ namespace NadekoBot.Modules.Administration
             try
             {
                 await user.KickAsync().ConfigureAwait(false);
-                await imsg.Channel.SendMessageAsync("Kicked user " + user.Username + " Id: " + user.Id).ConfigureAwait(false);
+                await channel.SendMessageAsync("Kicked user " + user.Username + " Id: " + user.Id).ConfigureAwait(false);
             }
             catch
             {
-                await imsg.Channel.SendMessageAsync("Error. Most likely I don't have sufficient permissions.").ConfigureAwait(false);
+                await channel.SendMessageAsync("Error. Most likely I don't have sufficient permissions.").ConfigureAwait(false);
             }
         }
 
@@ -282,11 +283,11 @@ namespace NadekoBot.Modules.Administration
                 {
                     await u.ModifyAsync(usr => usr.Mute = true).ConfigureAwait(false);
                 }
-                await imsg.Channel.SendMessageAsync("Mute successful").ConfigureAwait(false);
+                await channel.SendMessageAsync("Mute successful").ConfigureAwait(false);
             }
             catch
             {
-                await imsg.Channel.SendMessageAsync("I most likely don't have the permission necessary for that.").ConfigureAwait(false);
+                await channel.SendMessageAsync("I most likely don't have the permission necessary for that.").ConfigureAwait(false);
             }
         }
 
@@ -305,11 +306,11 @@ namespace NadekoBot.Modules.Administration
                 {
                     await u.ModifyAsync(usr => usr.Mute = false).ConfigureAwait(false);
                 }
-                await imsg.Channel.SendMessageAsync("Unmute successful").ConfigureAwait(false);
+                await channel.SendMessageAsync("Unmute successful").ConfigureAwait(false);
             }
             catch
             {
-                await imsg.Channel.SendMessageAsync("I most likely don't have the permission necessary for that.").ConfigureAwait(false);
+                await channel.SendMessageAsync("I most likely don't have the permission necessary for that.").ConfigureAwait(false);
             }
         }
 
@@ -328,11 +329,11 @@ namespace NadekoBot.Modules.Administration
                 {
                     await u.ModifyAsync(usr=>usr.Deaf = true).ConfigureAwait(false);
                 }
-                await imsg.Channel.SendMessageAsync("Deafen successful").ConfigureAwait(false);
+                await channel.SendMessageAsync("Deafen successful").ConfigureAwait(false);
             }
             catch
             {
-                await imsg.Channel.SendMessageAsync("I most likely don't have the permission necessary for that.").ConfigureAwait(false);
+                await channel.SendMessageAsync("I most likely don't have the permission necessary for that.").ConfigureAwait(false);
             }
 
         }
@@ -351,21 +352,21 @@ namespace NadekoBot.Modules.Administration
                 {
                     await u.ModifyAsync(usr=> usr.Deaf = false).ConfigureAwait(false);
                 }
-                await imsg.Channel.SendMessageAsync("Undeafen successful").ConfigureAwait(false);
+                await channel.SendMessageAsync("Undeafen successful").ConfigureAwait(false);
             }
             catch
             {
-                await imsg.Channel.SendMessageAsync("I most likely don't have the permission necessary for that.").ConfigureAwait(false);
+                await channel.SendMessageAsync("I most likely don't have the permission necessary for that.").ConfigureAwait(false);
             }
         }
 
         [LocalizedCommand, LocalizedDescription, LocalizedSummary]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(GuildPermission.ManageChannels)]
-        public async Task DelVoiChanl(IMessage imsg, [Remainder] IVoiceChannel channel)
+        public async Task DelVoiChanl(IMessage imsg, [Remainder] IVoiceChannel voiceChannel)
         {
-            await channel.DeleteAsync().ConfigureAwait(false);
-            await imsg.Channel.SendMessageAsync($"Removed channel **{channel.Name}**.").ConfigureAwait(false);
+            await voiceChannel.DeleteAsync().ConfigureAwait(false);
+            await imsg.Channel.SendMessageAsync($"Removed channel **{voiceChannel.Name}**.").ConfigureAwait(false);
         }
 
         [LocalizedCommand, LocalizedDescription, LocalizedSummary]
@@ -376,7 +377,7 @@ namespace NadekoBot.Modules.Administration
             var channel = imsg.Channel as ITextChannel;
             //todo actually print info about created channel
             await channel.Guild.CreateVoiceChannelAsync(channelName).ConfigureAwait(false);
-            await imsg.Channel.SendMessageAsync($"Created voice channel **{channelName}**.").ConfigureAwait(false);
+            await channel.SendMessageAsync($"Created voice channel **{channelName}**.").ConfigureAwait(false);
         }
 
         [LocalizedCommand, LocalizedDescription, LocalizedSummary]
@@ -385,7 +386,7 @@ namespace NadekoBot.Modules.Administration
         public async Task DelTxtChanl(IMessage imsg, [Remainder] ITextChannel channel)
         {
             await channel.DeleteAsync().ConfigureAwait(false);
-            await imsg.Channel.SendMessageAsync($"Removed text channel **{channel.Name}**.").ConfigureAwait(false);
+            await channel.SendMessageAsync($"Removed text channel **{channel.Name}**.").ConfigureAwait(false);
         }
 
         [LocalizedCommand, LocalizedDescription, LocalizedSummary]
@@ -396,7 +397,7 @@ namespace NadekoBot.Modules.Administration
             var channel = imsg.Channel as ITextChannel;
             //todo actually print info about created channel
             var txtCh = await channel.Guild.CreateTextChannelAsync(channelName).ConfigureAwait(false);
-            await imsg.Channel.SendMessageAsync($"Added text channel **{channelName}**.").ConfigureAwait(false);
+            await channel.SendMessageAsync($"Added text channel **{channelName}**.").ConfigureAwait(false);
         }
 
         [LocalizedCommand, LocalizedDescription, LocalizedSummary]
@@ -408,7 +409,7 @@ namespace NadekoBot.Modules.Administration
             topic = topic ?? "";
             await (channel as ITextChannel).ModifyAsync(c => c.Topic = topic);
             //await (channel).ModifyAsync(c => c).ConfigureAwait(false);
-            await imsg.Channel.SendMessageAsync(":ok: **New channel topic set.**").ConfigureAwait(false);
+            await channel.SendMessageAsync(":ok: **New channel topic set.**").ConfigureAwait(false);
 
         }
         [LocalizedCommand, LocalizedDescription, LocalizedSummary]
@@ -419,7 +420,7 @@ namespace NadekoBot.Modules.Administration
             var channel = imsg.Channel as ITextChannel;
 
             await channel.ModifyAsync(c => c.Name = name).ConfigureAwait(false);
-            await imsg.Channel.SendMessageAsync(":ok: **New channel name set.**").ConfigureAwait(false);
+            await channel.SendMessageAsync(":ok: **New channel name set.**").ConfigureAwait(false);
         }
 
 
@@ -471,7 +472,7 @@ namespace NadekoBot.Modules.Administration
         //{
         //    var channel = imsg.Channel as ITextChannel;
 
-        //    await imsg.Channel.SendMessageAsync("`Shutting down.`").ConfigureAwait(false);
+        //    await channel.SendMessageAsync("`Shutting down.`").ConfigureAwait(false);
         //    await Task.Delay(2000).ConfigureAwait(false);
         //    Environment.Exit(0);
         //}
@@ -501,7 +502,7 @@ namespace NadekoBot.Modules.Administration
         //    await client.CurrentUser.Edit("", avatar: image.ToStream()).ConfigureAwait(false);
 
         //    // Send confirm.
-        //    await imsg.Channel.SendMessageAsync("New avatar set.").ConfigureAwait(false);
+        //    await channel.SendMessageAsync("New avatar set.").ConfigureAwait(false);
         //}
 
         ////todo owner only
@@ -543,7 +544,7 @@ namespace NadekoBot.Modules.Administration
         //        {
         //            return;
         //        }
-        //        await channel.SendMessage(msg);
+        //        await channel.SendMessageAsync(msg);
         //    }
         //    else if (ids[1].ToUpperInvariant().StartsWith("U:"))
         //    {
@@ -553,11 +554,11 @@ namespace NadekoBot.Modules.Administration
         //        {
         //            return;
         //        }
-        //        await user.SendMessage(msg);
+        //        await user.SendMessageAsync(msg);
         //    }
         //    else
         //    {
-        //        await imsg.Channel.SendMessageAsync("`Invalid format.`");
+        //        await channel.SendMessageAsync("`Invalid format.`");
         //    }
         //}
 
@@ -579,7 +580,7 @@ namespace NadekoBot.Modules.Administration
         //            UserName = donator.Name,
         //            UserId = (long)donator.Id
         //        });
-        //        imsg.Channel.SendMessageAsync("Successfuly added a new donator. 👑").ConfigureAwait(false);
+        //        channel.SendMessageAsync("Successfuly added a new donator. 👑").ConfigureAwait(false);
         //    }
         //    catch { }
 
@@ -594,10 +595,10 @@ namespace NadekoBot.Modules.Administration
 
         //    foreach (var ch in (await _client.GetGuildsAsync().ConfigureAwait(false)).Select(async g => await g.GetDefaultChannelAsync().ConfigureAwait(false)))
         //    {
-        //        await imsg.Channel.SendMessageAsync(message).ConfigureAwait(false);
+        //        await channel.SendMessageAsync(message).ConfigureAwait(false);
         //    }
 
-        //    await imsg.Channel.SendMessageAsync(":ok:").ConfigureAwait(false);
+        //    await channel.SendMessageAsync(":ok:").ConfigureAwait(false);
         //}
 
         ////todo owner only
@@ -669,7 +670,7 @@ namespace NadekoBot.Modules.Administration
         //    var donatorsOrdered = rows.OrderByDescending(d => d.Amount);
         //    string str = $"**Thanks to the people listed below for making this project happen!**\n";
 
-        //    await imsg.Channel.SendMessageAsync(str + string.Join("⭐", donatorsOrdered.Select(d => d.UserName))).ConfigureAwait(false);
+        //    await channel.SendMessageAsync(str + string.Join("⭐", donatorsOrdered.Select(d => d.UserName))).ConfigureAwait(false);
         //}
     }
 }

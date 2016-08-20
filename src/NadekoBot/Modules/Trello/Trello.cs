@@ -75,14 +75,14 @@
 //                    .Parameter("board_id", Discord.Commands.ParameterType.Required)
 //                    .Do(async e =>
 //                    {
-//                        if (!NadekoBot.IsOwner(e.User.Id)) return;
+//                        if (!NadekoBot.IsOwner(imsg.Author.Id)) return;
 //                        if (bound != null) return;
 //                        try
 //                        {
 //                            bound = e.Channel;
 //                            board = new Board(e.GetArg("board_id").Trim());
 //                            board.Refresh();
-//                            await imsg.Channel.SendMessageAsync("Successfully bound to this channel and board " + board.Name);
+//                            await channel.SendMessageAsync("Successfully bound to this channel and board " + board.Name);
 //                            t.Start();
 //                        }
 //                        catch (Exception ex)
@@ -95,12 +95,12 @@
 //                    .Description($"Unbinds a bot from the channel and board. **Bot Owner Only!**| `{Prefix}unbind`")
 //                    .Do(async e =>
 //                    {
-//                        if (!NadekoBot.IsOwner(e.User.Id)) return;
+//                        if (!NadekoBot.IsOwner(imsg.Author.Id)) return;
 //                        if (bound == null || bound != e.Channel) return;
 //                        t.Stop();
 //                        bound = null;
 //                        board = null;
-//                        await imsg.Channel.SendMessageAsync("Successfully unbound trello from this channel.").ConfigureAwait(false);
+//                        await channel.SendMessageAsync("Successfully unbound trello from this channel.").ConfigureAwait(false);
 
 //                    });
 
@@ -109,9 +109,9 @@
 //                    .Description($"Lists all lists, yo ;) **Bot Owner Only!**| `{Prefix}list`")
 //                    .Do(async e =>
 //                    {
-//                        if (!NadekoBot.IsOwner(e.User.Id)) return;
+//                        if (!NadekoBot.IsOwner(imsg.Author.Id)) return;
 //                        if (bound == null || board == null || bound != e.Channel) return;
-//                        await imsg.Channel.SendMessageAsync("Lists for a board '" + board.Name + "'\n" + string.Join("\n", board.Lists.Select(l => "**• " + l.ToString() + "**")))
+//                        await channel.SendMessageAsync("Lists for a board '" + board.Name + "'\n" + string.Join("\n", board.Lists.Select(l => "**• " + l.ToString() + "**")))
 //                                       .ConfigureAwait(false);
 //                    });
 
@@ -120,7 +120,7 @@
 //                    .Parameter("list_name", Discord.Commands.ParameterType.Unparsed)
 //                    .Do(async e =>
 //                    {
-//                        if (!NadekoBot.IsOwner(e.User.Id)) return;
+//                        if (!NadekoBot.IsOwner(imsg.Author.Id)) return;
 //                        if (bound == null || board == null || bound != e.Channel || e.GetArg("list_name") == null) return;
 
 //                        int num;
@@ -133,10 +133,10 @@
 
 
 //                        if (list != null)
-//                            await imsg.Channel.SendMessageAsync("There are " + list.Cards.Count() + " cards in a **" + list.Name + "** list\n" + string.Join("\n", list.Cards.Select(c => "**• " + c.ToString() + "**")))
+//                            await channel.SendMessageAsync("There are " + list.Cards.Count() + " cards in a **" + list.Name + "** list\n" + string.Join("\n", list.Cards.Select(c => "**• " + c.ToString() + "**")))
 //                                           .ConfigureAwait(false);
 //                        else
-//                            await imsg.Channel.SendMessageAsync("No such list.")
+//                            await channel.SendMessageAsync("No such list.")
 //                                           .ConfigureAwait(false);
 //                    });
 //            });
