@@ -18,9 +18,9 @@ namespace NadekoBot.Modules.Pokemon
     [Module(">", AppendSpace = false)]
     public class PokemonModule : DiscordModule
     {
-        public ConcurrentDictionary<long, PokemonServer> Dictionary;
-        public readonly List<PokemonType> PokemonTypes;
-        public readonly List<PokemonMove> PokemonMoves;
+        public static ConcurrentDictionary<long, PokemonServer> Dictionary;
+        public static  List<PokemonType> PokemonTypes;
+        public static  List<PokemonMove> PokemonMoves;
         public ConcurrentDictionary<PokemonPlayer, PokemonPlayer> DuelProposals;
         private Random _rand;
         public PokemonModule(ILocalization loc, CommandService cmds, IBotConfiguration config, IDiscordClient client) : base(loc, cmds, config, client)
@@ -60,12 +60,12 @@ namespace NadekoBot.Modules.Pokemon
                 //check if any of the two is fainted
                 if (attacker.IsFainted())
                 {
-                    await msg.Reply("{0} is fainted and can't move!", attacker);
+                    await msg.Reply(string.Format("{0} is fainted and can't move!", attacker));
                     return;
                 }
                 if (defender.IsFainted())
                 {
-                    await msg.Reply("{0} has already fainted!", defender);
+                    await msg.Reply(string.Format("{0} has already fainted!", defender));
                     return;
                 }
                 //check if in duel
@@ -199,8 +199,9 @@ namespace NadekoBot.Modules.Pokemon
         }
 
 
-        public PokemonPlayer GenerateNewPlayer(long id)
+        public static PokemonPlayer GenerateNewPlayer(long id)
         {
+            var _rand = new Random();
             var t = generateRandomType(id);
             var hp = _rand.Next(80, 120);
             return new PokemonPlayer()
@@ -213,13 +214,13 @@ namespace NadekoBot.Modules.Pokemon
                     Agility = _rand.Next(10, 50),
                     Strength = _rand.Next(80, 120)
                 },
-                PokemonType = generateRandomType(id),
-                Moves = generateRandomMoves(t),
+                PokemonType = t,
+                Moves = generateRandomMoves(t, _rand),
 
             };
         }
         
-        private PokemonType generateRandomType(long id)
+        private static PokemonType generateRandomType(long id)
         {
             return PokemonTypes[(int)(id % PokemonTypes.Count)];
         }
@@ -229,7 +230,7 @@ namespace NadekoBot.Modules.Pokemon
         /// </summary>
         /// <param name="focus">Moves will have at least 1 move of this type and will not have a move of a weakness of the type</param>
         /// <returns></returns>
-        private Dictionary<PokemonMove, int> generateRandomMoves(PokemonType focus)
+        private static Dictionary<PokemonMove, int> generateRandomMoves(PokemonType focus, Random _rand)
         {
             var dict = new Dictionary<PokemonMove, int>();
             //2 steps: select a move with type Focus

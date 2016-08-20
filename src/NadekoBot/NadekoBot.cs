@@ -93,6 +93,7 @@ namespace NadekoBot
         {
             var throwaway = Task.Run(async () =>
             {
+               
                 var t = await Commands.Execute(imsg, imsg.Content);
                 if (t.IsSuccess)
                 {
