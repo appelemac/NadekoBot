@@ -5,10 +5,12 @@
     except:
       - 1.0
 
-  configuration: Release
-  deploy:
-    provider: AzureCS
-
+  configuration: Debug
+  before_build
+    - git submodule update --init --recursive
+    - nuget restore
+  build:
+    verbosity: minimal
 # configuration for all branches starting from "dev-"
 # build in Debug mode and deploy locally for testing
 -
