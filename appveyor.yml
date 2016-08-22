@@ -13,7 +13,7 @@ before_build:
     nuget restore
 build:
   verbosity: minimal
- -
+  
   branches:
     only:
 	- 1.0
