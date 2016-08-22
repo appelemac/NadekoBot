@@ -16,7 +16,7 @@ build:
   
   branches:
     only:
-	- 1.0
+       - 1.0
 build_script:
 - ps: >-
     #cd $Env:BUILD_SOURCESDIRECTORY
