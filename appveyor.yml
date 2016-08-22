@@ -6,7 +6,7 @@
       - 1.0
 
   configuration: Debug
-  before_build
+  before_build:
     - git submodule update --init --recursive
     - nuget restore
   build:
