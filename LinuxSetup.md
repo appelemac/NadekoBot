@@ -1,5 +1,5 @@
 #Setting up NadekoBot on Linux
-
+BAKABAKABAKAAAKALLALALAKAKAKAKAKKAK
 ####Setting up NadekoBot on Linux Digital Ocean Droplet
 ######If you want Nadeko to play music for you 24/7 without having to hosting it on your PC and want to keep it cheap, reliable and convenient as possible, you can try Nadeko on Linux Digital Ocean Droplet using the link [DigitalOcean][DigitalOcean] (and using this link will be supporting Nadeko and will give you **$10 credit**)
 
