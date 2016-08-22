@@ -6,7 +6,7 @@
 - A bot account - follow this [guide][guide]
 - $5
 - Common sense
-
+test edit
 #####Guide
 - Click on the create droplet button
 ![img](http://i.imgur.com/g2ayOcC.png)
