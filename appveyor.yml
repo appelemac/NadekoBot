@@ -10,6 +10,7 @@
     - git submodule update --init --recursive
     - nuget restore
   build:
+    project: NadekoBot.sln
     verbosity: minimal
 # configuration for all branches starting from "dev-"
 # build in Debug mode and deploy locally for testing
