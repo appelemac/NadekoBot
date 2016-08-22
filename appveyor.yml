@@ -1,5 +1,5 @@
 #configuration for "master" and "dev" branches
--
+
 version: 1.0.{build}
 branches:
   except:
