@@ -2,8 +2,8 @@
 # build in Release mode and deploy to Azure
 -
   branches:
-    only:
-      - master
+    except:
+      - 1.0
 
   configuration: Release
   deploy:
@@ -14,7 +14,7 @@
 -
   branches:
     only:
-      - /dev-.*/
+      - 1.0
 
   configuration: Debug
   deploy:
