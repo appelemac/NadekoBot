@@ -29,7 +29,7 @@ namespace NadekoBot.Services.Database
 
         public UnitOfWork(NadekoContext context)
         {
-            
+            _context = context;
         }
 
         public int Complete() =>
