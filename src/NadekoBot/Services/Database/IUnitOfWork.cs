@@ -12,6 +12,8 @@ namespace NadekoBot.Services.Database
         IQuoteRepository Quotes { get; }
         IConfigRepository Configs { get; }
         IDonatorsRepository Donators { get; }
+        IServerReactionRepository ServerReactions { get; }
+        IGlobalReactionRepository GlobalReactions { get; }
         int Complete();
         Task<int> CompleteAsync();
     }

@@ -6544,8 +6544,8 @@
       "type": "package",
       "path": "System.Net.WebSockets.Client/4.0.0",
       "files": [
-        "System.Net.WebSockets.Client.4.0.0.nupkg.sha512",
-        "System.Net.WebSockets.Client.nuspec",
+        "System.Net.Websockets.Client.4.0.0.nupkg.sha512",
+        "System.Net.Websockets.Client.nuspec",
         "ThirdPartyNotices.txt",
         "dotnet_library_license.txt",
         "lib/MonoAndroid10/_._",

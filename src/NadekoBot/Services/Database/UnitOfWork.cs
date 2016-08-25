@@ -21,6 +21,12 @@ namespace NadekoBot.Services.Database
         private IDonatorsRepository _donators;
         public IDonatorsRepository Donators => _donators ?? (_donators = new DonatorsRepository(_context));
 
+        private IServerReactionRepository _serverReactions;
+        public IServerReactionRepository ServerReactions => _serverReactions ?? (_serverReactions = new ServerReactionRepository(_context));
+
+        private IGlobalReactionRepository _globalReactions;
+        public IGlobalReactionRepository GlobalReactions => _globalReactions ?? (_globalReactions = new GlobalReactionRepository(_context));
+
         public UnitOfWork(NadekoContext context)
         {
             
