@@ -4,10 +4,39 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace NadekoBot.Migrations
 {
-    public partial class FirstMigration : Migration
+    public partial class NadekoM : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "GlobalReactions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Autoincrement", true),
+                    IsRegex = table.Column<bool>(nullable: false),
+                    Trigger = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GlobalReactions", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ServerReactions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Autoincrement", true),
+                    IsRegex = table.Column<bool>(nullable: false),
+                    ServerId = table.Column<long>(nullable: false),
+                    Trigger = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ServerReactions", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Donators",
                 columns: table => new
@@ -66,6 +95,33 @@ namespace NadekoBot.Migrations
                     table.PrimaryKey("PK_Quotes", x => x.Id);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Response",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Autoincrement", true),
+                    CustomGlobalReactionId = table.Column<int>(nullable: true),
+                    CustomServerReactionId = table.Column<int>(nullable: true),
+                    Text = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Response", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Response_GlobalReactions_CustomGlobalReactionId",
+                        column: x => x.CustomGlobalReactionId,
+                        principalTable: "GlobalReactions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Response_ServerReactions_CustomServerReactionId",
+                        column: x => x.CustomServerReactionId,
+                        principalTable: "ServerReactions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Donators_UserId",
                 table: "Donators",
@@ -77,6 +133,16 @@ namespace NadekoBot.Migrations
                 table: "GuildConfigs",
                 column: "GuildId",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Response_CustomGlobalReactionId",
+                table: "Response",
+                column: "CustomGlobalReactionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Response_CustomServerReactionId",
+                table: "Response",
+                column: "CustomServerReactionId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -89,6 +155,15 @@ namespace NadekoBot.Migrations
 
             migrationBuilder.DropTable(
                 name: "Quotes");
+
+            migrationBuilder.DropTable(
+                name: "Response");
+
+            migrationBuilder.DropTable(
+                name: "GlobalReactions");
+
+            migrationBuilder.DropTable(
+                name: "ServerReactions");
         }
     }
 }

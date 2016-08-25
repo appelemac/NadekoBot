@@ -7,7 +7,7 @@ namespace NadekoBot.Services
         bool DontJoinServers { get; set; }
         bool ForwardMessages { get; set; }
         bool ForwardToAllOwners { get; set; }
-
+        bool EnableCustomReactions { get; set; }
         bool RotatePlayingStatus { get; set; }
         List<string> PlayingStatuses { get; set; }
 

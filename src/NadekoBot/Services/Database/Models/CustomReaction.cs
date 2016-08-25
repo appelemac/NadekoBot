@@ -8,7 +8,17 @@ using System.Threading.Tasks;
 
 namespace NadekoBot.Services.Database.Models
 {
-    public class CustomGlobalReaction : DbEntity
+    public interface ICustomReaction {
+        List<Response> Responses { get; set; }
+        //[NotMapped]
+        Regex Regex { get; set; }
+        string Trigger { get; set; }
+        bool IsRegex { get; set; }
+
+    }
+
+
+    public class CustomGlobalReaction : DbEntity, ICustomReaction
     {
         
         public List<Response> Responses { get; set; }
@@ -16,9 +26,10 @@ namespace NadekoBot.Services.Database.Models
         public Regex Regex { get; set; }
         public string Trigger { get; set; }
         public bool IsRegex { get; set; }
+        public override string ToString() => $"Trigger: {Trigger}\n Regex: {IsRegex}\n Responses: {string.Join("\n-", Responses.Select(r => r.Text))}";
     }
 
-    public class CustomServerReaction : DbEntity
+    public class CustomServerReaction : DbEntity, ICustomReaction
     {
         public long ServerId { get; set; }
         [NotMapped]
@@ -28,7 +39,7 @@ namespace NadekoBot.Services.Database.Models
         public bool IsRegex { get; set; }
     }
 
-    public class Response
+    public class Response : DbEntity
     {
         public string Text { get; set; }
     }

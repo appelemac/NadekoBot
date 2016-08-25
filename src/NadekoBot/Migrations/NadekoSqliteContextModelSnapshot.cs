@@ -15,6 +15,36 @@ namespace NadekoBot.Migrations
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.0.0-rtm-21431");
 
+            modelBuilder.Entity("NadekoBot.Services.Database.Models.CustomGlobalReaction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<bool>("IsRegex");
+
+                    b.Property<string>("Trigger");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("GlobalReactions");
+                });
+
+            modelBuilder.Entity("NadekoBot.Services.Database.Models.CustomServerReaction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<bool>("IsRegex");
+
+                    b.Property<long>("ServerId");
+
+                    b.Property<string>("Trigger");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ServerReactions");
+                });
+
             modelBuilder.Entity("NadekoBot.Services.Database.Models.Donator", b =>
                 {
                     b.Property<int>("Id")
@@ -96,6 +126,37 @@ namespace NadekoBot.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Quotes");
+                });
+
+            modelBuilder.Entity("NadekoBot.Services.Database.Models.Response", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int?>("CustomGlobalReactionId");
+
+                    b.Property<int?>("CustomServerReactionId");
+
+                    b.Property<string>("Text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomGlobalReactionId");
+
+                    b.HasIndex("CustomServerReactionId");
+
+                    b.ToTable("Response");
+                });
+
+            modelBuilder.Entity("NadekoBot.Services.Database.Models.Response", b =>
+                {
+                    b.HasOne("NadekoBot.Services.Database.Models.CustomGlobalReaction")
+                        .WithMany("Responses")
+                        .HasForeignKey("CustomGlobalReactionId");
+
+                    b.HasOne("NadekoBot.Services.Database.Models.CustomServerReaction")
+                        .WithMany("Responses")
+                        .HasForeignKey("CustomServerReactionId");
                 });
         }
     }

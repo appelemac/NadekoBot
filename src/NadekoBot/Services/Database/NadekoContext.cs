@@ -13,6 +13,8 @@ namespace NadekoBot.Services.Database
         public DbSet<Quote> Quotes { get; set; }
         public DbSet<Donator> Donators { get; set; }
         public DbSet<GuildConfig> GuildConfigs { get; set; }
+        public DbSet<CustomGlobalReaction> GlobalReactions { get; set; }
+        public DbSet<CustomServerReaction> ServerReactions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace NadekoBot.Services.Impl
@@ -88,5 +89,7 @@ namespace NadekoBot.Services.Impl
             "🦀",
             "🦄"
         };
+
+        public bool EnableCustomReactions { get; set; } = true;
     }
 }
