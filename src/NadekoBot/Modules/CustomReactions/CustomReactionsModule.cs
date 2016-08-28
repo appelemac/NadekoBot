@@ -10,27 +10,29 @@ using System.Text.RegularExpressions;
 using NadekoBot.Services.Database.Models;
 using NadekoBot.Extensions;
 using NadekoBot.Attributes;
+using System.Reflection;
+using System.Text;
 
 namespace NadekoBot.Modules.CustomReactions
-{ 
-    [Module(".", AppendSpace =false)]
-    public class CustomReactionsModule : DiscordModule
+{
+    [Module(".", AppendSpace = false)]
+    public class CustomReactions : DiscordModule
     {
         private ReactionFormatProvider formatProvider;
         private HashSet<CustomGlobalReaction> _globalReactions;
         private HashSet<CustomServerReaction> _serverReactions;
         private static Random _rand = new Random();
         private ulong currentUserId = 0;
-
-        public CustomReactionsModule(ILocalization loc, CommandService cmds, IBotConfiguration config, DiscordSocketClient client) : base(loc, cmds, config, client)
+        private Regex _creationCommandRegex;
+        public const string SERVER_PREFIX = "server ";
+        public CustomReactions(ILocalization loc, CommandService cmds, IBotConfiguration config, DiscordSocketClient client) : base(loc, cmds, config, client)
         {
-            //todo initialize that shit :D
-            //including creating compiled regexes!
             if (config.EnableCustomReactions) //EnableCustomReactions
             {
                 _log.Info("Initializing Custom Reactions");
                 InitReactions();
                 client.MessageReceived += CustomReactionsChecker;
+                _creationCommandRegex = new Regex($"^(?<serverCommand>{SERVER_PREFIX}\\s)?(?<trigger>(?<regexTrigger>/.*?/)|(?<normalTrigger>\".*?\")|(?<basictrigger>\\S*)) (?<responses>(?<response>.*?(?=\\||$))+)$", RegexOptions.Compiled);
             }
         }
 
@@ -61,87 +63,228 @@ namespace NadekoBot.Modules.CustomReactions
             }
         }
 
-        private async Task CustomReactionsChecker(IMessage arg) //should this run a task!?
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        private async Task CustomReactionsChecker(IMessage arg)
+#pragma warning restore CS1998
         {
-            if (arg.Author.Id != currentUserId && arg.Channel is IGuildChannel)
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+            Task.Run(async () =>
             {
-                //first check for global
-                foreach (var reaction in _globalReactions)
+                if (arg.Author.Id != currentUserId && arg.Channel is IGuildChannel)
                 {
-                    if (reaction.IsRegex)
+                    //first check for global
+                    foreach (var reaction in _globalReactions)
                     {
-                        Match m;
-                        if ((m = reaction.Regex.Match(arg.Content)) != null)
+                        if (reaction.IsRegex)
+                        {
+                            Match m;
+                            if ((m = reaction.Regex.Match(arg.Content)) != null)
+                            {
+                                _log.Info($"CustomCommand: {arg.Content}");
+                                await React(arg, reaction, m);
+                            }
+                        }
+                        else if (arg.Content.StartsWith(reaction.Trigger))
                         {
                             _log.Info($"CustomCommand: {arg.Content}");
-                            await React(arg, reaction, m);
+                            await React(arg, reaction);
                         }
                     }
-                    else if (arg.Content.StartsWith(reaction.Trigger))
+                    var guildId = (long)(arg.Channel as IGuildChannel).Guild.Id;
+                    //same for serverReactions
+                    foreach (var reaction in _serverReactions.Where(s => s.ServerId == guildId))
                     {
-                        _log.Info($"CustomCommand: {arg.Content}");
-                        await React(arg, reaction);
-                    }
-                }
-                var guildId = (long)(arg.Channel as IGuildChannel).Guild.Id;
-                //same for serverReactions
-                foreach (var reaction in _serverReactions.Where(s => s.ServerId == guildId))
-                {
-                    if (reaction.IsRegex)
-                    {
-                        Match m;
-                        if ((m = reaction.Regex.Match(arg.Content)) != null)
+                        if (reaction.IsRegex)
+                        {
+                            Match m;
+                            if ((m = reaction.Regex.Match(arg.Content)) != null)
+                            {
+                                _log.Info($"CustomCommand: {arg.Content}");
+                                await React(arg, reaction, m);
+                            }
+                        }
+                        else if (arg.Content.StartsWith(reaction.Trigger))
                         {
                             _log.Info($"CustomCommand: {arg.Content}");
-                            await React(arg, reaction, m);
+                            await React(arg, reaction);
                         }
                     }
-                    else if (arg.Content.StartsWith(reaction.Trigger))
-                    {
-                        _log.Info($"CustomCommand: {arg.Content}");
-                        await React(arg, reaction);
-                    }
                 }
+            });
+#pragma warning restore CS4014
+        }
+
+        [LocalizedCommand, LocalizedDescription, LocalizedSummary]
+        [RequireContext(ContextType.Guild)]
+        public async Task ListCustReact(IMessage msg)
+        {
+            var channel = msg.Channel as IGuildChannel;
+            //todo add pagify
+            StringBuilder builder = new StringBuilder();
+            builder.AppendLine("Global Reactions: ```xl");
+            foreach (var reaction in _globalReactions)
+            {
+                builder.AppendLine(reaction.ToString());
             }
+            builder.AppendLine("```\nServer Reactions:```xl");
+            foreach (var reaction in _serverReactions)
+            {
+                builder.AppendLine(reaction.ToString());
+            }
+            await msg.ReplyLong(builder.ToString());
+        }
+
+        [LocalizedCommand, LocalizedDescription, LocalizedSummary]
+        [RequireContext(ContextType.Guild)]
+        public async Task DelCustReact(IMessage msg, [Remainder] string content)
+        {
+            var m = Regex.Match(content, $@"({SERVER_PREFIX})?(.*?(?= \d+|$))\s*(\d+)?$");
+            if (!m.Success) return;
+            string name = m.Groups[2].Value;
+            int indexToRemove = -1;
+            var channel = msg.Channel as IGuildChannel;
+            if (NadekoBot.Credentials.OwnerIds.Contains(msg.Author.Id) && !m.Groups[1].Success)
+            {
+                //global command
+                var reaction = _globalReactions.FirstOrDefault(s => s.Trigger.Equals(name));
+                if (reaction == null)
+                {
+                    await msg.Reply(string.Format("Could not find a trigger corresponding to the given key: \"{0}\" in the global reactions list, try prefixing with \"{1}\"", name, SERVER_PREFIX));
+                    return;
+                }
+                if (m.Groups[3].Success)
+                {
+                    int index = int.Parse(m.Groups[3].Value);
+                    if (reaction.Responses.Count < index)
+                    {
+                        await msg.Reply("Index too large");
+                        return;
+                    }
+                }
+                using (var uow = DbHandler.Instance.GetUnitOfWork())
+                {
+                    if (indexToRemove >= 0)
+                    {
+                        reaction.Responses.RemoveAt(indexToRemove);
+                        uow.GlobalReactions.Update(reaction);
+                        //it's a reference value, so should be updated already
+                        await msg.Reply("removed response");
+                    } else
+                    {
+                        uow.GlobalReactions.Remove(reaction.Id);
+                        _globalReactions.Remove(reaction);
+                        await msg.Reply(string.Format("Succesfully removed reaction from db: {0}", reaction.ToString()));
+                    }
+                    uow.Complete();
+                }
+                return;
+            }
+            else if (name.StartsWith(SERVER_PREFIX))
+            {
+                name = name.Remove(0, SERVER_PREFIX.Length);
+            }
+            //server reaction
+            var serverReaction = _serverReactions.FirstOrDefault(s => s.Trigger.Equals(name));
+            if (serverReaction == null)
+            {
+                await msg.Reply(string.Format("Could not find a trigger corresponding to the given key: \"{0}\" in the server reactions list", name));
+                return;
+            }
+            if (m.Groups[3].Success)
+            {
+                int index = int.Parse(m.Groups[3].Value);
+                if (serverReaction.Responses.Count < index)
+                {
+                    await msg.Reply("Index too large");
+                    return;
+                }
+
+            }
+            using (var uow = DbHandler.Instance.GetUnitOfWork())
+            {
+                if (indexToRemove >= 0)
+                {
+                    serverReaction.Responses.RemoveAt(indexToRemove);
+                    uow.ServerReactions.Update(serverReaction);
+                    //it's a reference value, so should be updated already
+                    await msg.Reply("removed response");
+                }
+                else
+                {
+                    uow.GlobalReactions.Remove(serverReaction.Id);
+                    _serverReactions.Remove(serverReaction);
+                    await msg.Reply(string.Format("Succesfully removed reaction from db: {0}", serverReaction.ToString()));
+                }
+
+            }
+            _serverReactions.Remove(serverReaction);
+            await msg.Reply(string.Format("Succesfully removed reaction from db: {0}", serverReaction.ToString()));
+            return;
+
         }
         [LocalizedCommand, LocalizedDescription, LocalizedSummary]
         public async Task AddCustReact(IMessage msg, [Remainder] string message)
         {
-            if (NadekoBot.Credentials.OwnerIds.Contains(msg.Author.Id))
+            if (_creationCommandRegex == null)
             {
-                if (message.StartsWith("server "))
-                {
-                    message = message.Remove(0, "server ".Length /* -1 */);
-                    //create server-only command
-                } else
-                {
-                    //global command
-                    var items = message.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
-                    if (items.Length > 1) 
-                    {
-                        //regex
-                        CustomGlobalReaction reaction = new CustomGlobalReaction()
-                        {
-                            Trigger = items[0],
-                            IsRegex = true,
-                            //todo decide if we want to split responses or do one at a time
-                            Responses = new List<Response>() { new Response { Text = items[1] } },
-                            Regex = new Regex(items[0],RegexOptions.Compiled)
-                            
-                        };
-                        if (string.IsNullOrWhiteSpace(reaction.Trigger)) return;
-                        _globalReactions.Add(reaction);
-                        using (var uow = DbHandler.Instance.GetUnitOfWork())
-                        {
-                            uow.GlobalReactions.Add(reaction);
-                        }
-                        await msg.Reply("Created custom reaction: " + reaction.ToString());
-                    }
-                }
+                _log.Error("Custom Reactions have been disabled");
+                return;
             }
+            Match m = _creationCommandRegex.Match(message);
+            if (!m.Success)
+            {
+                _log.Debug("Match failed");
+                await msg.Reply("Could not Match to format");
+                return;
+            }
+            string trigger = m.Groups["regexTrigger"].Success ? m.Groups["regexTrigger"].Value : m.Groups["normalTrigger"].Success ? m.Groups["normalTrigger"].Value : m.Groups["basictrigger"].Value;
+            List<string> responses = new List<string>();
+            foreach (Group capture in m.Groups["responses"].Captures)
+            {
+                responses.Add(capture.Value);
+            }
+            ICustomReaction reaction;
+            if (m.Groups["serverCommand"].Success || !NadekoBot.Credentials.OwnerIds.Contains(msg.Author.Id))
+            {
+                //create server command
+                reaction = CreateReaction(trigger, m.Groups["regexTrigger"].Success, responses, serverId: (long)(msg.Channel as IGuildChannel).Id);
+            }
+            else
+            {
+                //global command
+                reaction = CreateReaction(trigger, m.Groups["regexTrigger"].Success, responses);
+            }
+            using (var uow = DbHandler.Instance.GetUnitOfWork())
+            {
+                if (reaction is CustomGlobalReaction)
+                    uow.GlobalReactions.Add((CustomGlobalReaction)reaction);
+                else
+                    uow.ServerReactions.Add((CustomServerReaction)reaction);
+                uow.Complete();
+            }
+            await msg.Reply("Created custom reaction: \n" + reaction.ToString());
+
         }
 
-        private async Task<IMessage> React<T>(IMessage msg, T customReact, Match m = null) where T : ICustomReaction => await msg.Reply(string.Format(formatProvider, customReact.Responses[_rand.Next(0, customReact.Responses.Count)].Text, msg.Author, msg.MentionedUsers, msg.Content,_rand)); //todo add possible objects here
+        private ICustomReaction CreateReaction(string trigger, bool isRegex, IEnumerable<string> responses, long serverId = 0)
+        {
+            ICustomReaction reaction;
+            if (serverId != 0)
+                reaction = new CustomServerReaction() { ServerId = serverId };
+            else
+                reaction = new CustomGlobalReaction();
+
+            reaction.IsRegex = isRegex;
+            reaction.Trigger = trigger;
+            reaction.Responses = responses.Select(s => new Response() { Text = s }).ToList();
+            if (isRegex)
+                reaction.Regex = new Regex(trigger, RegexOptions.Compiled);
+
+            return reaction;
+        }
+
+
+        private async Task<IMessage> React<T>(IMessage msg, T customReact, Match m = null) where T : ICustomReaction => await msg.Reply(string.Format(formatProvider, customReact.Responses[_rand.Next(0, customReact.Responses.Count)].Text, msg.Author, msg.MentionedUsers, _rand)); //todo add possible objects here
 
         public class ReactionFormatProvider : IFormatProvider, ICustomFormatter
         {
@@ -156,6 +299,7 @@ namespace NadekoBot.Modules.CustomReactions
                 if (!Equals(formatProvider)) return null;
                 //return null;
                 if (string.IsNullOrWhiteSpace(format)) return "";
+                //arg.GetTypeInfo().GetProperties()
                 switch (format.ToUpperInvariant())
                 {
                     case "NAME":
@@ -164,10 +308,8 @@ namespace NadekoBot.Modules.CustomReactions
                         return user.Username;
                     case "NICK":
                         IGuildUser guildUsr = arg as IGuildUser;
-                        if (guildUsr == null) return "";
-                        return guildUsr.Nickname;
-                        
-                   
+                        if (guildUsr != null) return guildUsr.Nickname;
+                        break;
                 }
                 //now for regex matches
                 var match = Regex.Match(format, @"RANDOM\[(\d+)\-(\d+)\]");

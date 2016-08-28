@@ -37,6 +37,7 @@ namespace NadekoBot.Services.Database.Models
         public List<Response> Responses { get; set; }
         public string Trigger { get; set; }
         public bool IsRegex { get; set; }
+        public override string ToString() => $"Trigger: {Trigger}\n Regex: {IsRegex}\n Responses: {string.Join("\n-", Responses.Select(r => r.Text))}";
     }
 
     public class Response : DbEntity
