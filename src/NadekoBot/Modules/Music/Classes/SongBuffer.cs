@@ -1,4 +1,5 @@
 ﻿using NadekoBot.Extensions;
+using NLog;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -15,15 +16,20 @@ namespace NadekoBot.Modules.Music.Classes
     /// Create a buffer for a song file. It will create multiples files to ensure, that radio don't fill up disk space.
     /// It also help for large music by deleting files that are already seen.
     /// </summary>
-    class SongBuffer
+    class SongBuffer : Stream
     {
-
-        public SongBuffer(string basename, SongInfo songInfo, int skipTo)
+        public SongBuffer(MusicPlayer musicPlayer, string basename, SongInfo songInfo, int skipTo, int maxFileSize)
         {
+            MusicPlayer = musicPlayer;
             Basename = basename;
             SongInfo = songInfo;
             SkipTo = skipTo;
+            MaxFileSize = maxFileSize;
+            CurrentFileStream = new FileStream(this.GetNextFile(), FileMode.OpenOrCreate, FileAccess.Read, FileShare.Write);
+            _log = LogManager.GetCurrentClassLogger();
         }
+
+        MusicPlayer MusicPlayer;
 
         private string Basename;
 
@@ -31,7 +37,7 @@ namespace NadekoBot.Modules.Music.Classes
 
         private int SkipTo;
 
-        private static int MAX_FILE_SIZE = 20.MiB();
+        private int MaxFileSize = 2.MiB();
 
         private long FileNumber = -1;
 
@@ -41,8 +47,11 @@ namespace NadekoBot.Modules.Music.Classes
 
         private ulong CurrentBufferSize = 0;
 
+        private FileStream CurrentFileStream;
+        private Logger _log;
+
         public Task BufferSong(CancellationToken cancelToken) =>
-           Task.Factory.StartNew(async () =>
+           Task.Run(async () =>
            {
                Process p = null;
                FileStream outStream = null;
@@ -66,7 +75,7 @@ namespace NadekoBot.Modules.Music.Classes
                    while (!p.HasExited) //Also fix low bandwidth
                    {
                        int bytesRead = await p.StandardOutput.BaseStream.ReadAsync(buffer, 0, buffer.Length, cancelToken).ConfigureAwait(false);
-                       if (currentFileSize >= MAX_FILE_SIZE)
+                       if (currentFileSize >= MaxFileSize)
                        {
                            try
                            {
@@ -116,13 +125,13 @@ Check the guides for your platform on how to setup ffmpeg correctly:
                        p.Dispose();
                    }
                }
-           }, TaskCreationOptions.LongRunning);
+           });
 
         /// <summary>
         /// Return the next file to read, and delete the old one
         /// </summary>
         /// <returns>Name of the file to read</returns>
-        public string GetNextFile()
+        private string GetNextFile()
         {
             string filename = Basename + "-" + NextFileToRead;
             
@@ -139,12 +148,12 @@ Check the guides for your platform on how to setup ffmpeg correctly:
             return filename;
         }
 
-        public bool IsNextFileReady()
+        private bool IsNextFileReady()
         {
             return NextFileToRead <= FileNumber;
         }
 
-        public void CleanFiles()
+        private void CleanFiles()
         {
             for (long i = NextFileToRead - 1 ; i <= FileNumber; i++)
             {
@@ -154,6 +163,60 @@ Check the guides for your platform on how to setup ffmpeg correctly:
                 }
                 catch { }
             }
+        }
+
+        //Stream part
+
+        public override bool CanRead => true;
+
+        public override bool CanSeek => false;
+
+        public override bool CanWrite => false;
+
+        public override long Length => (long) CurrentBufferSize;
+
+        public override long Position { get; set; } = 0;
+
+        public override void Flush() { }
+
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            int read = CurrentFileStream.Read(buffer, offset, count);
+            if(read < count)
+            {
+                if (!BufferingCompleted || IsNextFileReady())
+                {
+                    CurrentFileStream.Dispose();
+                    CurrentFileStream = new FileStream(GetNextFile(), FileMode.OpenOrCreate, FileAccess.Read, FileShare.Write);
+                    read += CurrentFileStream.Read(buffer, read + offset, count - read);
+                }
+                if (read < count)
+                    Array.Clear(buffer, read, count - read);
+            }
+            return read;
+        }
+
+        public override long Seek(long offset, SeekOrigin origin)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void SetLength(long value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Write(byte[] buffer, int offset, int count)
+        {
+            throw new NotImplementedException();
+        }
+
+        public new void Dispose()
+        {
+            CurrentFileStream.Dispose();
+            MusicPlayer.SongCancelSource.Cancel();
+            CleanFiles();
+            base.Dispose();
         }
     }
 }

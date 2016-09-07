@@ -12,16 +12,15 @@ namespace NadekoBot.Modules.Games
 {
     public partial class GamesModule
     {
-        //todo DB in the future
         public static ConcurrentDictionary<IGuild, Poll> ActivePolls = new ConcurrentDictionary<IGuild, Poll>();
 
-        [LocalizedCommand, LocalizedDescription, LocalizedSummary]
+        [LocalizedCommand, LocalizedDescription, LocalizedSummary, LocalizedAlias]
         [RequireContext(ContextType.Guild)]
-        public async Task Poll(IMessage imsg, [Remainder] string arg = null)
+        public async Task Poll(IUserMessage umsg, [Remainder] string arg = null)
         {
-            var channel = (ITextChannel)imsg.Channel;
+            var channel = (ITextChannel)umsg.Channel;
 
-            if (!(imsg.Author as IGuildUser).GuildPermissions.ManageChannels)
+            if (!(umsg.Author as IGuildUser).GuildPermissions.ManageChannels)
                 return;
             if (string.IsNullOrWhiteSpace(arg) || !arg.Contains(";"))
                 return;
@@ -29,20 +28,20 @@ namespace NadekoBot.Modules.Games
             if (data.Length < 3)
                 return;
 
-            var poll = new Poll(imsg, data[0], data.Skip(1));
+            var poll = new Poll(umsg, data[0], data.Skip(1));
             if (ActivePolls.TryAdd(channel.Guild, poll))
             {
                 await poll.StartPoll().ConfigureAwait(false);
             }
         }
 
-        [LocalizedCommand, LocalizedDescription, LocalizedSummary]
+        [LocalizedCommand, LocalizedDescription, LocalizedSummary, LocalizedAlias]
         [RequireContext(ContextType.Guild)]
-        public async Task Pollend(IMessage imsg)
+        public async Task Pollend(IUserMessage umsg)
         {
-            var channel = (ITextChannel)imsg.Channel;
+            var channel = (ITextChannel)umsg.Channel;
 
-            if (!(imsg.Author as IGuildUser).GuildPermissions.ManageChannels)
+            if (!(umsg.Author as IGuildUser).GuildPermissions.ManageChannels)
                 return;
             Poll poll;
             ActivePolls.TryGetValue(channel.Guild, out poll);
@@ -52,16 +51,16 @@ namespace NadekoBot.Modules.Games
 
     public class Poll
     {
-        private readonly IMessage imsg;
+        private readonly IUserMessage umsg;
         private readonly string[] answers;
         private ConcurrentDictionary<IUser, int> participants = new ConcurrentDictionary<IUser, int>();
         private readonly string question;
         private DateTime started;
         private CancellationTokenSource pollCancellationSource = new CancellationTokenSource();
 
-        public Poll(IMessage imsg, string question, IEnumerable<string> enumerable)
+        public Poll(IUserMessage umsg, string question, IEnumerable<string> enumerable)
         {
-            this.imsg = imsg;
+            this.umsg = umsg;
             this.question = question;
             this.answers = enumerable as string[] ?? enumerable.ToArray();
         }
@@ -70,13 +69,13 @@ namespace NadekoBot.Modules.Games
         {
             started = DateTime.Now;
             NadekoBot.Client.MessageReceived += Vote;
-            var msgToSend = $@"📃**{imsg.Author.Username}** has created a poll which requires your attention:
+            var msgToSend = $@"📃**{umsg.Author.Username}** has created a poll which requires your attention:
 
 **{question}**\n";
             var num = 1;
             msgToSend = answers.Aggregate(msgToSend, (current, answ) => current + $"`{num++}.` **{answ}**\n");
             msgToSend += "\n**Private Message me with the corresponding number of the answer.**";
-            await imsg.Channel.SendMessageAsync(msgToSend).ConfigureAwait(false);
+            await umsg.Channel.SendMessageAsync(msgToSend).ConfigureAwait(false);
         }
 
         public async Task StopPoll(IGuildChannel ch)
@@ -91,7 +90,7 @@ namespace NadekoBot.Modules.Games
                 var totalVotesCast = results.Sum(kvp => kvp.Value);
                 if (totalVotesCast == 0)
                 {
-                    await imsg.Channel.SendMessageAsync("📄 **No votes have been cast.**").ConfigureAwait(false);
+                    await umsg.Channel.SendMessageAsync("📄 **No votes have been cast.**").ConfigureAwait(false);
                     return;
                 }
                 var closeMessage = $"--------------**POLL CLOSED**--------------\n" +
@@ -100,7 +99,7 @@ namespace NadekoBot.Modules.Games
                                                                                  $" has {kvp.Value} votes." +
                                                                                  $"({kvp.Value * 1.0f / totalVotesCast * 100}%)\n");
 
-                await imsg.Channel.SendMessageAsync($"📄 **Total votes cast**: {totalVotesCast}\n{closeMessage}").ConfigureAwait(false);
+                await umsg.Channel.SendMessageAsync($"📄 **Total votes cast**: {totalVotesCast}\n{closeMessage}").ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -108,23 +107,36 @@ namespace NadekoBot.Modules.Games
             }
         }
 
-        private async Task Vote(IMessage msg)
+        private Task Vote(IMessage imsg)
         {
-            try
+            // has to be a user message
+            var msg = imsg as IUserMessage;
+            if (msg == null)
+                return Task.CompletedTask;
+            // channel must be private
+            IPrivateChannel ch;
+            if ((ch = msg.Channel as IPrivateChannel) == null)
+                return Task.CompletedTask;
+
+            // has to be an integer
+            int vote;
+            if (!int.TryParse(msg.Content, out vote)) return Task.CompletedTask;
+
+            var t = Task.Run(async () =>
             {
-                IPrivateChannel ch;
-                if ((ch = msg.Channel as IPrivateChannel) == null)
-                    return;
-                int vote;
-                if (!int.TryParse(msg.Content, out vote)) return;
-                if (vote < 1 || vote > answers.Length)
-                    return;
-                if (participants.TryAdd(msg.Author, vote))
+                try
                 {
-                    await (ch as ITextChannel).SendMessageAsync($"Thanks for voting **{msg.Author.Username}**.").ConfigureAwait(false);
+                    
+                    if (vote < 1 || vote > answers.Length)
+                        return;
+                    if (participants.TryAdd(msg.Author, vote))
+                    {
+                        await (ch as ITextChannel).SendMessageAsync($"Thanks for voting **{msg.Author.Username}**.").ConfigureAwait(false);
+                    }
                 }
-            }
-            catch { }
+                catch { }
+            });
+            return Task.CompletedTask;
         }
     }
 }

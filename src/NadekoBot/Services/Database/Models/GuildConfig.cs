@@ -28,5 +28,14 @@ namespace NadekoBot.Services.Database.Models
         public bool SendChannelByeMessage { get; set; }
         public string ChannelByeMessageText { get; set; } = "%user% has left!";
 
+        //self assignable roles
+        public bool ExclusiveSelfAssignedRoles { get; set; }
+        public bool AutoDeleteSelfAssignedRoleMessages { get; set; }
+        public float DefaultMusicVolume { get; set; } = 1.0f;
+        public bool VoicePlusTextEnabled { get; set; }
+
+
+        //stream notifications
+        public List<FollowedStream> FollowedStreams { get; set; } = new List<FollowedStream>();
     }
 }

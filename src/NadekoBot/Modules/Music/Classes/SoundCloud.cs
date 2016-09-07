@@ -1,5 +1,4 @@
-﻿using NadekoBot.Classes;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.Linq;
 using System.Net.Http;
@@ -41,7 +40,7 @@ namespace NadekoBot.Modules.Music.Classes
         public bool IsSoundCloudLink(string url) =>
             System.Text.RegularExpressions.Regex.IsMatch(url, "(.*)(soundcloud.com|snd.sc)(.*)");
 
-        internal async Task<SoundCloudVideo> GetVideoByQueryAsync(string query)
+        public async Task<SoundCloudVideo> GetVideoByQueryAsync(string query)
         {
             if (string.IsNullOrWhiteSpace(query))
                 throw new ArgumentNullException(nameof(query));

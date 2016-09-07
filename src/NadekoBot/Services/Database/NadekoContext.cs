@@ -15,7 +15,14 @@ namespace NadekoBot.Services.Database
         public DbSet<GuildConfig> GuildConfigs { get; set; }
         public DbSet<CustomGlobalReaction> GlobalReactions { get; set; }
         public DbSet<CustomServerReaction> ServerReactions { get; set; }
-
+        public DbSet<ClashWar> ClashOfClans { get; set; }
+        public DbSet<ClashCaller> ClashCallers { get; set; }
+        public DbSet<Reminder> Reminders { get; set; }
+        public DbSet<SelfAssignedRole> SelfAssignableRoles { get; set; }
+        public DbSet<BotConfig> BotConfig { get; set; }
+        public DbSet<Repeater> Repeaters { get; set; }
+        public DbSet<Currency> Currency { get; set; }
+        public DbSet<TypingArticle> TypingArticles { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             #region QUOTES
@@ -23,8 +30,7 @@ namespace NadekoBot.Services.Database
             var quoteEntity = modelBuilder.Entity<Quote>();
 
             #endregion
-
-
+            
             #region Donators
 
             var donatorEntity = modelBuilder.Entity<Donator>();
@@ -41,6 +47,43 @@ namespace NadekoBot.Services.Database
                 .HasIndex(c => c.GuildId)
                 .IsUnique();
 
+            #endregion
+
+            #region ClashOfClans
+
+            var callersEntity = modelBuilder.Entity<ClashCaller>();
+            callersEntity
+                .HasOne(c => c.ClashWar)
+                .WithMany(c => c.Bases);
+
+            #endregion
+
+            #region Self Assignable Roles
+
+            var selfassignableRolesEntity = modelBuilder.Entity<SelfAssignedRole>();
+
+            selfassignableRolesEntity
+                .HasIndex(s => new { s.GuildId, s.RoleId })
+                .IsUnique();
+
+            #endregion
+
+            #region Repeater
+
+            var repeaterEntity = modelBuilder.Entity<Repeater>();
+
+            repeaterEntity
+                .HasIndex(r => r.ChannelId)
+                .IsUnique();
+
+            #endregion
+
+            #region Currency
+            var currencyEntity = modelBuilder.Entity<Currency>();
+
+            currencyEntity
+                .HasIndex(c => c.UserId)
+                .IsUnique();
             #endregion
         }
         protected abstract override void OnConfiguring(DbContextOptionsBuilder optionsBuilder);

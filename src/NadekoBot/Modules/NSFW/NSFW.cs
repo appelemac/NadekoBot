@@ -18,15 +18,15 @@ namespace NadekoBot.Modules.NSFW
     [Module("~", AppendSpace = false)]
     public class NSFW : DiscordModule
     {
-        public NSFW(ILocalization loc, CommandService cmds, IBotConfiguration config, DiscordSocketClient client) : base(loc, cmds, config, client)
+        public NSFW(ILocalization loc, CommandService cmds, DiscordSocketClient client) : base(loc, cmds, client)
         {
         }
 
-        [LocalizedCommand, LocalizedDescription, LocalizedSummary]
+        [LocalizedCommand, LocalizedDescription, LocalizedSummary, LocalizedAlias]
         [RequireContext(ContextType.Guild)]
-        public async Task Hentai(IMessage imsg, [Remainder] string tag = null)
+        public async Task Hentai(IUserMessage umsg, [Remainder] string tag = null)
         {
-            var channel = (ITextChannel)imsg.Channel;
+            var channel = (ITextChannel)umsg.Channel;
 
             tag = tag?.Trim() ?? "";
 
@@ -41,11 +41,11 @@ namespace NadekoBot.Modules.NSFW
             await channel.SendMessageAsync(String.Join("\n\n", links)).ConfigureAwait(false);
         }
 
-        [LocalizedCommand, LocalizedDescription, LocalizedSummary]
+        [LocalizedCommand, LocalizedDescription, LocalizedSummary, LocalizedAlias]
         [RequireContext(ContextType.Guild)]
-        public async Task Danbooru(IMessage imsg, [Remainder] string tag = null)
+        public async Task Danbooru(IUserMessage umsg, [Remainder] string tag = null)
         {
-            var channel = (ITextChannel)imsg.Channel;
+            var channel = (ITextChannel)umsg.Channel;
 
             tag = tag?.Trim() ?? "";
             var link = await GetDanbooruImageLink(tag).ConfigureAwait(false);
@@ -55,11 +55,11 @@ namespace NadekoBot.Modules.NSFW
                 await channel.SendMessageAsync(link).ConfigureAwait(false);
         }
 
-        [LocalizedCommand, LocalizedDescription, LocalizedSummary]
+        [LocalizedCommand, LocalizedDescription, LocalizedSummary, LocalizedAlias]
         [RequireContext(ContextType.Guild)]
-        public async Task Gelbooru(IMessage imsg, [Remainder] string tag = null)
+        public async Task Gelbooru(IUserMessage umsg, [Remainder] string tag = null)
         {
-            var channel = (ITextChannel)imsg.Channel;
+            var channel = (ITextChannel)umsg.Channel;
 
             tag = tag?.Trim() ?? "";
             var link = await GetRule34ImageLink(tag).ConfigureAwait(false);
@@ -69,11 +69,11 @@ namespace NadekoBot.Modules.NSFW
                 await channel.SendMessageAsync(link).ConfigureAwait(false);
         }
 
-        [LocalizedCommand, LocalizedDescription, LocalizedSummary]
+        [LocalizedCommand, LocalizedDescription, LocalizedSummary, LocalizedAlias]
         [RequireContext(ContextType.Guild)]
-        public async Task Rule34(IMessage imsg, [Remainder] string tag = null)
+        public async Task Rule34(IUserMessage umsg, [Remainder] string tag = null)
         {
-            var channel = (ITextChannel)imsg.Channel;
+            var channel = (ITextChannel)umsg.Channel;
 
             tag = tag?.Trim() ?? "";
             var link = await GetGelbooruImageLink(tag).ConfigureAwait(false);
@@ -83,11 +83,11 @@ namespace NadekoBot.Modules.NSFW
                 await channel.SendMessageAsync(link).ConfigureAwait(false);
         }
 
-        [LocalizedCommand, LocalizedDescription, LocalizedSummary]
+        [LocalizedCommand, LocalizedDescription, LocalizedSummary, LocalizedAlias]
         [RequireContext(ContextType.Guild)]
-        public async Task E621(IMessage imsg, [Remainder] string tag = null)
+        public async Task E621(IUserMessage umsg, [Remainder] string tag = null)
         {
-            var channel = (ITextChannel)imsg.Channel;
+            var channel = (ITextChannel)umsg.Channel;
 
             tag = tag?.Trim() ?? "";
             var link = await GetE621ImageLink(tag).ConfigureAwait(false);
@@ -97,20 +97,20 @@ namespace NadekoBot.Modules.NSFW
                 await channel.SendMessageAsync(link).ConfigureAwait(false);
         }
 
-        [LocalizedCommand, LocalizedDescription, LocalizedSummary]
+        [LocalizedCommand, LocalizedDescription, LocalizedSummary, LocalizedAlias]
         [RequireContext(ContextType.Guild)]
-        public async Task Cp(IMessage imsg)
+        public async Task Cp(IUserMessage umsg)
         {
-            var channel = (ITextChannel)imsg.Channel;
+            var channel = (ITextChannel)umsg.Channel;
 
             await channel.SendMessageAsync("http://i.imgur.com/MZkY1md.jpg").ConfigureAwait(false);
         }
 
-        [LocalizedCommand, LocalizedDescription, LocalizedSummary]
+        [LocalizedCommand, LocalizedDescription, LocalizedSummary, LocalizedAlias]
         [RequireContext(ContextType.Guild)]
-        public async Task Boobs(IMessage imsg)
+        public async Task Boobs(IUserMessage umsg)
         {
-            var channel = (ITextChannel)imsg.Channel;
+            var channel = (ITextChannel)umsg.Channel;
             try
             {
                 JToken obj;
@@ -126,11 +126,11 @@ namespace NadekoBot.Modules.NSFW
             }
         }
 
-        [LocalizedCommand, LocalizedDescription, LocalizedSummary]
+        [LocalizedCommand, LocalizedDescription, LocalizedSummary, LocalizedAlias]
         [RequireContext(ContextType.Guild)]
-        public async Task Butts(IMessage imsg)
+        public async Task Butts(IUserMessage umsg)
         {
-            var channel = (ITextChannel)imsg.Channel;
+            var channel = (ITextChannel)umsg.Channel;
 
             try
             {
@@ -204,7 +204,7 @@ namespace NadekoBot.Modules.NSFW
         }
 
 
-        internal static async Task<string> GetE621ImageLink(string tags)
+        public static async Task<string> GetE621ImageLink(string tags)
         {
             try
             {

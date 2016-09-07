@@ -15,7 +15,6 @@ namespace NadekoBot.Modules.Searches
         [Group]
         public class PokemonSearchCommands
         {
-            //todo DB
             private static Dictionary<string, SearchPokemon> pokemons = new Dictionary<string, SearchPokemon>();
             private static Dictionary<string, SearchPokemonAbility> pokemonAbilities = new Dictionary<string, SearchPokemonAbility>();
 
@@ -39,11 +38,11 @@ namespace NadekoBot.Modules.Searches
                     _log.Warn(PokemonAbilitiesFile + " is missing. Pokemon abilities not loaded.");
             }
 
-            [LocalizedCommand, LocalizedDescription, LocalizedSummary]
+            [LocalizedCommand, LocalizedDescription, LocalizedSummary, LocalizedAlias]
             [RequireContext(ContextType.Guild)]
-            public async Task Pokemon(IMessage imsg, [Remainder] string pokemon = null)
+            public async Task Pokemon(IUserMessage umsg, [Remainder] string pokemon = null)
             {
-                var channel = (ITextChannel)imsg.Channel;
+                var channel = (ITextChannel)umsg.Channel;
 
                 pokemon = pokemon?.Trim().ToUpperInvariant();
                 if (string.IsNullOrWhiteSpace(pokemon))
@@ -60,11 +59,11 @@ namespace NadekoBot.Modules.Searches
                 await channel.SendMessageAsync("`No pokemon found.`");
             }
 
-            [LocalizedCommand, LocalizedDescription, LocalizedSummary]
+            [LocalizedCommand, LocalizedDescription, LocalizedSummary, LocalizedAlias]
             [RequireContext(ContextType.Guild)]
-            public async Task PokemonAbility(IMessage imsg, [Remainder] string ability = null)
+            public async Task PokemonAbility(IUserMessage umsg, [Remainder] string ability = null)
             {
-                var channel = (ITextChannel)imsg.Channel;
+                var channel = (ITextChannel)umsg.Channel;
 
                 ability = ability?.Trim().ToUpperInvariant().Replace(" ", "");
                 if (string.IsNullOrWhiteSpace(ability))

@@ -11,11 +11,11 @@
 ////todo drawing
 //namespace NadekoBot.Modules.Gambling
 //{
-//    internal class DrawCommand : DiscordCommand
+//    public class DrawCommand : DiscordCommand
 //    {
 //        public DrawCommand(DiscordModule module) : base(module) { }
 
-//        internal override void Init(CommandGroupBuilder cgb)
+//        public override void Init(CommandGroupBuilder cgb)
 //        {
 //            cgb.CreateCommand(Module.Prefix + "draw")
 //                .Description($"Draws a card from the deck.If you supply number [x], she draws up to 5 cards from the deck. | `{Prefix}draw [x]`")
@@ -80,7 +80,7 @@
 //                await e.Channel.SendFile(images.Count + " cards.jpg", bitmap.ToStream()).ConfigureAwait(false);
 //                if (cardObjects.Count == 5)
 //                {
-//                    await channel.SendMessageAsync($"{imsg.Author.Mention} `{Cards.GetHandValue(cardObjects)}`").ConfigureAwait(false);
+//                    await channel.SendMessageAsync($"{umsg.Author.Mention} `{Cards.GetHandValue(cardObjects)}`").ConfigureAwait(false);
 //                }
 //            }
 //            catch (Exception ex)

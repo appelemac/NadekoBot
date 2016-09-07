@@ -17,11 +17,11 @@ namespace NadekoBot.Modules.Games
         {
             public static ConcurrentDictionary<ulong, TriviaGame> RunningTrivias = new ConcurrentDictionary<ulong, TriviaGame>();
 
-            [LocalizedCommand, LocalizedDescription, LocalizedSummary]
+            [LocalizedCommand, LocalizedDescription, LocalizedSummary, LocalizedAlias]
             [RequireContext(ContextType.Guild)]
-            public async Task Trivia(IMessage imsg, string[] args)
+            public async Task Trivia(IUserMessage umsg, string[] args)
             {
-                var channel = (ITextChannel)imsg.Channel;
+                var channel = (ITextChannel)umsg.Channel;
 
                 TriviaGame trivia;
                 if (!RunningTrivias.TryGetValue(channel.Guild.Id, out trivia))
@@ -34,7 +34,7 @@ namespace NadekoBot.Modules.Games
                     }).Where(t => t.Item1).Select(t => t.Item2).FirstOrDefault();
                     if (number < 0)
                         return;
-                    var triviaGame = new TriviaGame(channel.Guild, imsg.Channel as ITextChannel, showHints, number == 0 ? 10 : number);
+                    var triviaGame = new TriviaGame(channel.Guild, umsg.Channel as ITextChannel, showHints, number == 0 ? 10 : number);
                     if (RunningTrivias.TryAdd(channel.Guild.Id, triviaGame))
                         await channel.SendMessageAsync($"**Trivia game started! {triviaGame.WinRequirement} points needed to win.**").ConfigureAwait(false);
                     else
@@ -44,11 +44,11 @@ namespace NadekoBot.Modules.Games
                     await channel.SendMessageAsync("Trivia game is already running on this server.\n" + trivia.CurrentQuestion).ConfigureAwait(false);
             }
 
-            [LocalizedCommand, LocalizedDescription, LocalizedSummary]
+            [LocalizedCommand, LocalizedDescription, LocalizedSummary, LocalizedAlias]
             [RequireContext(ContextType.Guild)]
-            public async Task Tl(IMessage imsg)
+            public async Task Tl(IUserMessage umsg)
             {
-                var channel = (ITextChannel)imsg.Channel;
+                var channel = (ITextChannel)umsg.Channel;
 
                 TriviaGame trivia;
                 if (RunningTrivias.TryGetValue(channel.Guild.Id, out trivia))
@@ -57,11 +57,11 @@ namespace NadekoBot.Modules.Games
                     await channel.SendMessageAsync("No trivia is running on this server.").ConfigureAwait(false);
             }
 
-            [LocalizedCommand, LocalizedDescription, LocalizedSummary]
+            [LocalizedCommand, LocalizedDescription, LocalizedSummary, LocalizedAlias]
             [RequireContext(ContextType.Guild)]
-            public async Task Tq(IMessage imsg)
+            public async Task Tq(IUserMessage umsg)
             {
-                var channel = (ITextChannel)imsg.Channel;
+                var channel = (ITextChannel)umsg.Channel;
 
                 TriviaGame trivia;
                 if (RunningTrivias.TryRemove(channel.Guild.Id, out trivia))

@@ -28,7 +28,7 @@ namespace NadekoBot.Resources {
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
-        internal ResponseStrings() {
+        public ResponseStrings() {
         }
         
         /// <summary>
@@ -56,15 +56,6 @@ namespace NadekoBot.Resources {
             }
             set {
                 resourceCulture = value;
-            }
-        }
-        
-        /// <summary>
-        ///    Looks up a localized string similar to TESTING.
-        /// </summary>
-        public static string test {
-            get {
-                return ResourceManager.GetString("test", resourceCulture);
             }
         }
     }

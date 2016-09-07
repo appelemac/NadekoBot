@@ -14,9 +14,9 @@ namespace NadekoBot.Modules.Searches
     [Group]
     public partial class Searches
     {
-        [LocalizedCommand, LocalizedDescription, LocalizedSummary]
+        [LocalizedCommand, LocalizedDescription, LocalizedSummary, LocalizedAlias]
         [RequireContext(ContextType.Guild)]
-        public static async Task Calculate(IMessage msg, [Remainder] string expression)
+        public static async Task Calculate(IUserMessage msg, [Remainder] string expression)
         {
             try
             {
@@ -41,9 +41,9 @@ namespace NadekoBot.Modules.Searches
             }
         }
 
-        [LocalizedCommand, LocalizedDescription, LocalizedSummary]
+        [LocalizedCommand, LocalizedDescription, LocalizedSummary, LocalizedAlias]
         [RequireContext(ContextType.Guild)]
-        public async Task CalcOps(IMessage msg)
+        public async Task CalcOps(IUserMessage msg)
         {
             StringBuilder builder = new StringBuilder();
             var selection = typeof(Math).GetTypeInfo().GetMethods().Except(typeof(object).GetTypeInfo().GetMethods()).Select(x =>

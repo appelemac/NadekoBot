@@ -9,7 +9,6 @@ namespace NadekoBot.Modules.Games.Trivia
     public class TriviaQuestionPool
     {
         public static TriviaQuestionPool Instance { get; } = new TriviaQuestionPool();
-        //todo DB
         public HashSet<TriviaQuestion> pool = new HashSet<TriviaQuestion>();
 
         private Random rng { get; } = new Random();
@@ -28,9 +27,9 @@ namespace NadekoBot.Modules.Games.Trivia
             return list[rand];
         }
 
-        internal void Reload()
+        public void Reload()
         {
-            var arr = JArray.Parse(File.ReadAllText("data/questions.json"));
+            var arr = JArray.Parse(File.ReadAllText("data/triviaquestions.json"));
 
             foreach (var item in arr)
             {

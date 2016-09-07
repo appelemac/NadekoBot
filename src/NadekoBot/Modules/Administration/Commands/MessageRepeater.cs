@@ -1,130 +1,159 @@
-﻿//using Discord;
-//using Discord.Commands;
-//using NadekoBot.Classes;
-//using NadekoBot.Modules.Permissions.Classes;
-//using System;
-//using System.Collections.Concurrent;
-//using System.Threading.Tasks;
-//using System.Timers;
-////todo DB
-////todo persist restarts
-//namespace NadekoBot.Modules.Administration
-//{
-//    class MessageRepeater : DiscordCommand
-//    {
-//        private readonly ConcurrentDictionary<Server, Repeater> repeaters = new ConcurrentDictionary<Server, Repeater>();
-//        private class Repeater
-//        {
-//            [Newtonsoft.Json.JsonIgnore]
-//            public Timer MessageTimer { get; set; }
-//            [Newtonsoft.Json.JsonIgnore]
-//            public Channel RepeatingChannel { get; set; }
+﻿using Discord;
+using Discord.Commands;
+using Discord.WebSocket;
+using NadekoBot.Attributes;
+using NadekoBot.Services;
+using NadekoBot.Services.Database;
+using NadekoBot.Services.Database.Models;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
-//            public ulong RepeatingServerId { get; set; }
-//            public ulong RepeatingChannelId { get; set; }
-//            public Message lastMessage { get; set; } = null;
-//            public string RepeatingMessage { get; set; }
-//            public int Interval { get; set; }
+namespace NadekoBot.Modules.Administration
+{
+    public partial class Administration
+    {
+        [Group]
+        public class RepeatCommands
+        {
+            public ConcurrentDictionary<ulong, RepeatRunner> repeaters;
 
-//            public Repeater Start()
-//            {
-//                MessageTimer = new Timer { Interval = Interval };
-//                MessageTimer.Elapsed += async (s, e) => await Invoke();
-//                return this;
-//            }
+            public class RepeatRunner
+            {
+                private CancellationTokenSource source { get; set; }
+                private CancellationToken token { get; set; }
+                public Repeater Repeater { get; }
+                public ITextChannel Channel { get; }
 
-//            public async Task Invoke()
-//            {
-//                var ch = RepeatingChannel;
-//                var msg = RepeatingMessage;
-//                if (ch != null && !string.IsNullOrWhiteSpace(msg))
-//                {
-//                    try
-//                    {
-//                        if (lastMessage != null)
-//                            await lastMessage.Delete().ConfigureAwait(false);
-//                    }
-//                    catch { }
-//                    try
-//                    {
-//                        lastMessage = await ch.SendMessageAsync(msg).ConfigureAwait(false);
-//                    }
-//                    catch { }
-//                }
-//            }
-//        }
-//        internal override void Init(CommandGroupBuilder cgb)
-//        {
+                public RepeatRunner(Repeater repeater, ITextChannel channel = null)
+                {
+                    this.Repeater = repeater;
+                    this.Channel = channel ?? NadekoBot.Client.GetGuild(repeater.GuildId)?.GetTextChannel(repeater.ChannelId);
+                    if (Channel == null)
+                        return;
+                    Task.Run(Run);
+                }
 
-//            cgb.CreateCommand(Module.Prefix + "repeatinvoke")
-//                .Alias(Module.Prefix + "repinv")
-//                .Description($"Immediately shows the repeat message and restarts the timer. **Needs Manage Messages Permissions.**| `{Prefix}repinv`")
-//                .AddCheck(SimpleCheckers.ManageMessages())
-//                .Do(async e =>
-//                {
-//                    Repeater rep;
-//                    if (!repeaters.TryGetValue(e.Server, out rep))
-//                    {
-//                        await channel.SendMessageAsync("`No repeating message found on this server.`");
-//                        return;
-//                    }
 
-//                    await rep.Invoke();
-//                });
+                private async Task Run()
+                {
+                    source = new CancellationTokenSource();
+                    token = source.Token;
+                    try
+                    {
+                        while (!token.IsCancellationRequested)
+                        {
+                            await Task.Delay(Repeater.Interval, token).ConfigureAwait(false);
+                            await Channel.SendMessageAsync("🔄 " + Repeater.Message).ConfigureAwait(false);
+                        }
+                    }
+                    catch (OperationCanceledException) { }
+                }
 
-//            cgb.CreateCommand(Module.Prefix + "repeat")
-//                .Description("Repeat a message every X minutes. If no parameters are specified, " +
-//                             $"repeat is disabled. **Needs Manage Messages Permissions.** |`{Prefix}repeat 5 Hello there`")
-//                .Parameter("minutes", ParameterType.Optional)
-//                .Parameter("msg", ParameterType.Unparsed)
-//                .AddCheck(SimpleCheckers.ManageMessages())
-//                .Do(async e =>
-//                {
-//                    var minutesStr = minutes;
-//                    var msg = msg;
+                public void Reset()
+                {
+                    source.Cancel();
+                    var t = Task.Run(Run);
+                }
 
-//                    // if both null, disable
-//                    if (string.IsNullOrWhiteSpace(msg) && string.IsNullOrWhiteSpace(minutesStr))
-//                    {
+                public void Stop()
+                {
+                    source.Cancel();
+                }
+            }
 
-//                        Repeater rep;
-//                        if (!repeaters.TryRemove(e.Server, out rep))
-//                            return;
-//                        rep.MessageTimer.Stop();
-//                        await channel.SendMessageAsync("Repeating disabled").ConfigureAwait(false);
-//                        return;
-//                    }
-//                    int minutes;
-//                    if (!int.TryParse(minutesStr, out minutes) || minutes < 1 || minutes > 1440)
-//                    {
-//                        await channel.SendMessageAsync("Invalid value").ConfigureAwait(false);
-//                        return;
-//                    }
+            public RepeatCommands()
+            {
+                using (var uow = DbHandler.UnitOfWork())
+                {
+                    repeaters = new ConcurrentDictionary<ulong, RepeatRunner>(uow.Repeaters.GetAll().Select(r => new RepeatRunner(r)).Where(r => r != null).ToDictionary(r => r.Repeater.ChannelId));
+                }
+            }
 
-//                    var repeater = repeaters.GetOrAdd(
-//                        e.Server,
-//                        s => new Repeater
-//                        {
-//                            Interval = minutes * 60 * 1000,
-//                            RepeatingChannel = e.Channel,
-//                            RepeatingChannelId = e.Channel.Id,
-//                            RepeatingServerId = e.Server.Id,
-//                        }.Start()
-//                    );
+            [LocalizedCommand, LocalizedDescription, LocalizedSummary, LocalizedAlias]
+            [RequireContext(ContextType.Guild)]
+            [RequirePermission(GuildPermission.ManageMessages)]
+            public async Task RepeatInvoke(IUserMessage imsg)
+            {
+                var channel = (ITextChannel)imsg.Channel;
 
-//                    if (!string.IsNullOrWhiteSpace(msg))
-//                        repeater.RepeatingMessage = msg;
+                RepeatRunner rep;
+                if (!repeaters.TryGetValue(channel.Id, out rep))
+                {
+                    await channel.SendMessageAsync("`No repeating message found on this server.`").ConfigureAwait(false);
+                    return;
+                }
+                rep.Reset();
+                await channel.SendMessageAsync("🔄 " + rep.Repeater.Message).ConfigureAwait(false);
+            }
 
-//                    repeater.MessageTimer.Stop();
-//                    repeater.MessageTimer.Start();
+            [LocalizedCommand, LocalizedDescription, LocalizedSummary, LocalizedAlias]
+            [RequireContext(ContextType.Guild)]
+            public async Task Repeat(IUserMessage imsg)
+            {
+                var channel = (ITextChannel)imsg.Channel;
+                RepeatRunner rep;
+                if (repeaters.TryRemove(channel.Id, out rep))
+                {
+                    using (var uow = DbHandler.UnitOfWork())
+                    {
+                        uow.Repeaters.Remove(rep.Repeater);
+                        await uow.CompleteAsync();
+                    }
+                    rep.Stop();
+                    await channel.SendMessageAsync("`Stopped repeating a message.`").ConfigureAwait(false);
+                }
+                else
+                    await channel.SendMessageAsync("`No message is repeating.`").ConfigureAwait(false);
+            }
 
-//                    await channel.SendMessageAsync(String.Format("👌 Repeating `{0}` every " +
-//                                                              "**{1}** minutes on {2} channel.",
-//                                                              repeater.RepeatingMessage, minutes, repeater.RepeatingChannel))
-//                                                              .ConfigureAwait(false);
-//                });
-//        }
+            [LocalizedCommand, LocalizedDescription, LocalizedSummary, LocalizedAlias]
+            [RequireContext(ContextType.Guild)]
+            public async Task Repeat(IUserMessage imsg, int minutes, [Remainder] string message)
+            {
+                var channel = (ITextChannel)imsg.Channel;
 
-//        public MessageRepeater(DiscordModule module) : base(module) { }
-//    }
-//}
+                if (minutes < 1 || minutes > 1500)
+                    return;
+
+                if (string.IsNullOrWhiteSpace(message))
+                    return;
+
+                RepeatRunner rep;
+
+                rep = repeaters.AddOrUpdate(channel.Id, (cid) =>
+                {
+                    using (var uow = DbHandler.UnitOfWork())
+                    {
+                        var localRep = new Repeater
+                        {
+                            ChannelId = channel.Id,
+                            GuildId = channel.Guild.Id,
+                            Interval = TimeSpan.FromMinutes(minutes),
+                            Message = message,
+                        };
+                        uow.Repeaters.Add(localRep);
+                        uow.Complete();
+                        return new RepeatRunner(localRep, channel);
+                    }
+                }, (cid, old) =>
+                {
+                    using (var uow = DbHandler.UnitOfWork())
+                    {
+                        old.Repeater.Message = message;
+                        old.Repeater.Interval = TimeSpan.FromMinutes(minutes);
+                        uow.Repeaters.Update(old.Repeater);
+                        uow.Complete();
+                    }
+                    old.Reset();
+                    return old;
+                });
+
+                await channel.SendMessageAsync($"Repeating \"{rep.Repeater.Message}\" every {rep.Repeater.Interval} minutes").ConfigureAwait(false);
+            }
+        }
+    }
+}
