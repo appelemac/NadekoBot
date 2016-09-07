@@ -25,15 +25,17 @@ namespace NadekoBot.Modules.CustomReactions
         private ulong currentUserId = 0;
         private Regex _creationCommandRegex;
         public const string SERVER_PREFIX = "server ";
-        public CustomReactions(ILocalization loc, CommandService cmds, IBotConfiguration config, DiscordSocketClient client) : base(loc, cmds, config, client)
+
+        public CustomReactions(ILocalization loc, CommandService cmds, DiscordSocketClient client) : base(loc, cmds, client)
         {
-            if (config.EnableCustomReactions) //EnableCustomReactions
-            {
+          
+            //if (config.EnableCustomReactions) //EnableCustomReactions
+            //{
                 _log.Info("Initializing Custom Reactions");
                 InitReactions();
                 client.MessageReceived += CustomReactionsChecker;
                 _creationCommandRegex = new Regex($"^(?<serverCommand>{SERVER_PREFIX}\\s)?(?<trigger>(?<regexTrigger>/.*?/)|(?<normalTrigger>\".*?\")|(?<basictrigger>\\S*)) (?<responses>(?<response>.*?(?=\\||$))+)$", RegexOptions.Compiled);
-            }
+            //}
         }
 
         private void InitReactions()
@@ -72,6 +74,9 @@ namespace NadekoBot.Modules.CustomReactions
             {
                 if (arg.Author.Id != currentUserId && arg.Channel is IGuildChannel)
                 {
+                    var msg = arg as IUserMessage;
+                    if (msg == null) return;
+
                     //first check for global
                     foreach (var reaction in _globalReactions)
                     {
@@ -81,13 +86,13 @@ namespace NadekoBot.Modules.CustomReactions
                             if ((m = reaction.Regex.Match(arg.Content)) != null)
                             {
                                 _log.Info($"CustomCommand: {arg.Content}");
-                                await React(arg, reaction, m);
+                                await React(msg, reaction, m);
                             }
                         }
                         else if (arg.Content.StartsWith(reaction.Trigger))
                         {
                             _log.Info($"CustomCommand: {arg.Content}");
-                            await React(arg, reaction);
+                            await React(msg, reaction);
                         }
                     }
                     var guildId = (long)(arg.Channel as IGuildChannel).Guild.Id;
@@ -100,13 +105,13 @@ namespace NadekoBot.Modules.CustomReactions
                             if ((m = reaction.Regex.Match(arg.Content)) != null)
                             {
                                 _log.Info($"CustomCommand: {arg.Content}");
-                                await React(arg, reaction, m);
+                                await React(msg, reaction, m);
                             }
                         }
                         else if (arg.Content.StartsWith(reaction.Trigger))
                         {
                             _log.Info($"CustomCommand: {arg.Content}");
-                            await React(arg, reaction);
+                            await React(msg, reaction);
                         }
                     }
                 }
@@ -116,7 +121,7 @@ namespace NadekoBot.Modules.CustomReactions
 
         [LocalizedCommand, LocalizedDescription, LocalizedSummary]
         [RequireContext(ContextType.Guild)]
-        public async Task ListCustReact(IMessage msg)
+        public async Task ListCustReact(IUserMessage msg)
         {
             var channel = msg.Channel as IGuildChannel;
             //todo add pagify
@@ -136,7 +141,7 @@ namespace NadekoBot.Modules.CustomReactions
 
         [LocalizedCommand, LocalizedDescription, LocalizedSummary]
         [RequireContext(ContextType.Guild)]
-        public async Task DelCustReact(IMessage msg, [Remainder] string content)
+        public async Task DelCustReact(IUserMessage msg, [Remainder] string content)
         {
             var m = Regex.Match(content, $@"({SERVER_PREFIX})?(.*?(?= \d+|$))\s*(\d+)?$");
             if (!m.Success) return;
@@ -223,7 +228,7 @@ namespace NadekoBot.Modules.CustomReactions
 
         }
         [LocalizedCommand, LocalizedDescription, LocalizedSummary]
-        public async Task AddCustReact(IMessage msg, [Remainder] string message)
+        public async Task AddCustReact(IUserMessage msg, [Remainder] string message)
         {
             if (_creationCommandRegex == null)
             {
@@ -284,43 +289,11 @@ namespace NadekoBot.Modules.CustomReactions
         }
 
 
-        private async Task<IMessage> React<T>(IMessage msg, T customReact, Match m = null) where T : ICustomReaction => await msg.Reply(string.Format(formatProvider, customReact.Responses[_rand.Next(0, customReact.Responses.Count)].Text, msg.Author, msg.MentionedUsers, _rand)); //todo add possible objects here
+        private async Task<IMessage> React<T>(IUserMessage msg, T customReact, Match m = null) where T : ICustomReaction => await msg.Reply(string.Format(formatProvider, customReact.Responses[_rand.Next(0, customReact.Responses.Count)].Text, msg.Author, msg.MentionedUsers, _rand)); //todo add possible objects here
 
-        public class ReactionFormatProvider : IFormatProvider, ICustomFormatter
-        {
-            public object GetFormat(Type formatType)
-            {
-                if (formatType == typeof(ReactionFormatProvider))
-                    return this;
-                return null;
-            }
-            public string Format(string format, object arg, IFormatProvider formatProvider)
-            {
-                if (!Equals(formatProvider)) return null;
-                //return null;
-                if (string.IsNullOrWhiteSpace(format)) return "";
-                //arg.GetTypeInfo().GetProperties()
-                switch (format.ToUpperInvariant())
-                {
-                    case "NAME":
-                        IUser user = arg as IUser;
-                        if (user == null) return "";
-                        return user.Username;
-                    case "NICK":
-                        IGuildUser guildUsr = arg as IGuildUser;
-                        if (guildUsr != null) return guildUsr.Nickname;
-                        break;
-                }
-                //now for regex matches
-                var match = Regex.Match(format, @"RANDOM\[(\d+)\-(\d+)\]");
-                if (match.Success)
-                {
-                    return _rand.Next(int.Parse(match.Groups[1].Value), int.Parse(match.Groups[2].Value)).ToString();
-                }
-
-                return string.Empty;
-            }
-        }
+        
 
     }
+    
 }
+
