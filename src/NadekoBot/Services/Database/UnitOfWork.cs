@@ -44,6 +44,9 @@ namespace NadekoBot.Services.Database
         private ITypingArticlesRepository _typingArticles;
         public ITypingArticlesRepository TypingArticles => _typingArticles ?? (_typingArticles = new TypingArticlesRepository(_context));
 
+        private IPokemonRepository _pokemonSets;
+        public IPokemonRepository PokemonSets => _pokemonSets ?? (_pokemonSets = new PokemonRepository(_context));
+
         public UnitOfWork(NadekoContext context)
         {
             _context = context;

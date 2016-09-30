@@ -28,7 +28,7 @@ namespace NadekoBot.Services.Database.Repositories.Impl
         public T Get(int id) =>
             _set.FirstOrDefault(e => e.Id == id);
 
-        public IEnumerable<T> GetAll() =>
+        public List<T> GetAll() =>
             _set.ToList();
 
         public void Remove(int id) =>

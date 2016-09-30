@@ -11,7 +11,7 @@ namespace NadekoBot.Services.Database.Repositories
     public interface IRepository<T> where T : DbEntity
     {
         T Get(int id);
-        IEnumerable<T> GetAll();
+        List<T> GetAll();
 
         void Add(T obj);
         void AddRange(params T[] objs);
