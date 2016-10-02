@@ -27,13 +27,30 @@ namespace NadekoBot.Modules.CustomReactions
             string result = string.Empty;
             TypeSwitch.Do(
                 arg,
-                TypeSwitch.Case<IGuildUser>((u) => result = u.Nickname ?? u.Username),
-                TypeSwitch.Case<IEnumerable<IGuildUser>>(sup => result = "")
+                TypeSwitch.Case<IMessage>((u) => result = fromMessage(format)),
+                TypeSwitch.Case<System.Text.RegularExpressions.Match>(sup => result = fromMatch(format))
 
 
                 );
-
             return string.Empty;
+        }
+        /// <summary>
+        /// Regex match object
+        /// </summary>
+        /// <param name="format"></param>
+        /// <returns></returns>
+        private string fromMatch(string format)
+        {
+            throw new NotImplementedException();
+        }
+        /// <summary>
+        /// The message object
+        /// </summary>
+        /// <param name="format"></param>
+        /// <returns></returns>
+        private string fromMessage(string format)
+        {
+            throw new NotImplementedException();
         }
     }
 

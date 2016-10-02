@@ -15,8 +15,8 @@ namespace NadekoBot.Services.Database.Models
         public List<Response> Responses { get; set; }
         public string Trigger { get; set; }
         public bool IsRegex { get; set; }
-        public override string ToString() => $"Trigger: {Trigger}\n Regex: {IsRegex}\n Global: {ServerId == null}\n Responses: {string.Join("\n-", Responses.Select(r => r.Text))}";
-        public string ToStringWithoutResponses() => $"Trigger: {Trigger}\n Regex: {IsRegex}\n Global: {ServerId == null}";
+        public override string ToString() => $"Id: {Id}\nTrigger: {Trigger}\n Regex: {IsRegex}\n Global: {ServerId == null}\n Responses: {string.Join("\n-", Responses.Select(r => r.Text))}";
+        public string ToStringWithoutResponses() => $"Id: {Id}\nTrigger: {Trigger}\nRegex: {IsRegex}\nGlobal: {ServerId == null}";
 
     }
 
