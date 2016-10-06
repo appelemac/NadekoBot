@@ -38,7 +38,7 @@ Nadeko Support Server: https://discord.gg/0ehQwTK2RBjAxzEY";
         {
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         public async Task Modules(IUserMessage umsg)
         {
 
@@ -46,7 +46,7 @@ Nadeko Support Server: https://discord.gg/0ehQwTK2RBjAxzEY";
                                        .ConfigureAwait(false);
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         public async Task Commands(IUserMessage umsg, [Remainder] string module = null)
         {
             var channel = umsg.Channel;
@@ -76,7 +76,7 @@ Nadeko Support Server: https://discord.gg/0ehQwTK2RBjAxzEY";
             await channel.SendMessageAsync($"`You can type \"{NadekoBot.ModulePrefixes[typeof(Help).Name]}h CommandName\" to see the help about that specific command.`").ConfigureAwait(false);
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         public async Task H(IUserMessage umsg, [Remainder] string comToFind = null)
         {
             var channel = umsg.Channel;
@@ -84,7 +84,8 @@ Nadeko Support Server: https://discord.gg/0ehQwTK2RBjAxzEY";
             comToFind = comToFind?.ToLowerInvariant();
             if (string.IsNullOrWhiteSpace(comToFind))
             {
-                await (await (umsg.Author as IGuildUser).CreateDMChannelAsync()).SendMessageAsync(HelpString).ConfigureAwait(false);
+                IMessageChannel ch = channel is ITextChannel ? await ((IGuildUser)umsg.Author).CreateDMChannelAsync() : channel;
+                await ch.SendMessageAsync(HelpString).ConfigureAwait(false);
                 return;
             }
             var com = _commands.Commands.FirstOrDefault(c => c.Text.ToLowerInvariant() == comToFind || c.Aliases.Select(a=>a.ToLowerInvariant()).Contains(comToFind));
@@ -99,11 +100,11 @@ Nadeko Support Server: https://discord.gg/0ehQwTK2RBjAxzEY";
             if (alias != null)
                 str += $" / `{ alias }`";
             if (com != null)
-                await channel.SendMessageAsync(str + $@"{Environment.NewLine}**Desc:** {com.Remarks}
-**Usage:** {com.Summary}").ConfigureAwait(false);
+                await channel.SendMessageAsync(str + $@"{Environment.NewLine}**Desc:** {com.Summary}
+**Usage:** {com.Remarks}").ConfigureAwait(false);
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         [OwnerOnly]
         public Task Hgit(IUserMessage umsg)
@@ -131,7 +132,7 @@ Nadeko Support Server: https://discord.gg/0ehQwTK2RBjAxzEY";
             return Task.CompletedTask;
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         public async Task Guide(IUserMessage umsg)
         {
@@ -142,7 +143,7 @@ Nadeko Support Server: https://discord.gg/0ehQwTK2RBjAxzEY";
 **Hosting Guides and docs can be found here**: <http://nadekobot.rtfd.io>").ConfigureAwait(false);
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         public async Task Donate(IUserMessage umsg)
         {

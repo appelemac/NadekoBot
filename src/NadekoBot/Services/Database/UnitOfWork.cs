@@ -38,6 +38,7 @@ namespace NadekoBot.Services.Database
 
         private ICurrencyRepository _currency;
         public ICurrencyRepository Currency => _currency ?? (_currency = new CurrencyRepository(_context));
+
         private IUnitConverterRepository _conUnits;
         public IUnitConverterRepository ConverterUnits => _conUnits ?? (_conUnits = new UnitConverterRepository(_context));
 
@@ -46,6 +47,9 @@ namespace NadekoBot.Services.Database
 
         private ICustomReactionRepository _customReactions;
         public ICustomReactionRepository CustomReactions => _customReactions ?? (_customReactions = new CustomReactionsRepository(_context));
+
+        private IMusicPlaylistRepository _musicPlaylists;
+        public IMusicPlaylistRepository MusicPlaylists => _musicPlaylists ?? (_musicPlaylists = new MusicPlaylistRepository(_context));
 
         public UnitOfWork(NadekoContext context)
         {

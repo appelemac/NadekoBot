@@ -42,30 +42,31 @@ namespace NadekoBot.Modules.Administration
                 }
 
                 if (shouldDelete)
-                    await e.Message.DeleteAsync();
+                    await e.Message.DeleteAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
                 _log.Warn(ex, "Delmsgoncmd errored...");
             }
         }
-        
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         [OwnerOnly]
         public async Task Restart(IUserMessage umsg)
         {
             var channel = (ITextChannel)umsg.Channel;
 
-            await channel.SendMessageAsync("`Restarting in 2 seconds...`");
-            await Task.Delay(2000);
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo {
+            await channel.SendMessageAsync("`Restarting in 2 seconds...`").ConfigureAwait(false);
+            await Task.Delay(2000).ConfigureAwait(false);
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
                 Arguments = "dotnet " + System.Reflection.Assembly.GetEntryAssembly().Location
             });
             Environment.Exit(0);
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(GuildPermission.Administrator)]
         public async Task Delmsgoncmd(IUserMessage umsg)
@@ -80,12 +81,12 @@ namespace NadekoBot.Modules.Administration
                 await uow.CompleteAsync();
             }
             if (conf.DeleteMessageOnCommand)
-                await channel.SendMessageAsync("❗`Now automatically deleting successfull command invokations.`");
+                await channel.SendMessageAsync("❗`Now automatically deleting successfull command invokations.`").ConfigureAwait(false);
             else
-                await channel.SendMessageAsync("❗`Stopped automatic deletion of successfull command invokations.`");
+                await channel.SendMessageAsync("❗`Stopped automatic deletion of successfull command invokations.`").ConfigureAwait(false);
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(GuildPermission.ManageRoles)]
         public async Task Setrole(IUserMessage umsg, IGuildUser usr, [Remainder] IRole role)
@@ -103,7 +104,7 @@ namespace NadekoBot.Modules.Administration
             }
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(GuildPermission.ManageRoles)]
         public async Task Removerole(IUserMessage umsg, IGuildUser usr, [Remainder] IRole role)
@@ -120,7 +121,7 @@ namespace NadekoBot.Modules.Administration
             }
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(GuildPermission.ManageRoles)]
         public async Task RenameRole(IUserMessage umsg, IRole roleToEdit, string newname)
@@ -142,7 +143,7 @@ namespace NadekoBot.Modules.Administration
             }
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(GuildPermission.ManageRoles)]
         public async Task RemoveAllRoles(IUserMessage umsg, [Remainder] IGuildUser user)
@@ -160,7 +161,7 @@ namespace NadekoBot.Modules.Administration
             }
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(GuildPermission.ManageRoles)]
         public async Task CreateRole(IUserMessage umsg, [Remainder] string roleName = null)
@@ -181,7 +182,7 @@ namespace NadekoBot.Modules.Administration
             }
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(GuildPermission.ManageRoles)]
         public async Task RoleColor(IUserMessage umsg, params string[] args)
@@ -219,7 +220,7 @@ namespace NadekoBot.Modules.Administration
             }
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(GuildPermission.BanMembers)]
         public async Task Ban(IUserMessage umsg, IGuildUser user)
@@ -246,7 +247,7 @@ namespace NadekoBot.Modules.Administration
             }
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(GuildPermission.BanMembers)]
         public async Task Softban(IUserMessage umsg, IGuildUser user, [Remainder] string msg = null)
@@ -272,7 +273,7 @@ namespace NadekoBot.Modules.Administration
             }
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         public async Task Kick(IUserMessage umsg, IGuildUser user, [Remainder] string msg = null)
         {
@@ -300,7 +301,7 @@ namespace NadekoBot.Modules.Administration
             }
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(GuildPermission.MuteMembers)]
         public async Task Mute(IUserMessage umsg, params IGuildUser[] users)
@@ -323,7 +324,7 @@ namespace NadekoBot.Modules.Administration
             }
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(GuildPermission.MuteMembers)]
         public async Task Unmute(IUserMessage umsg, params IGuildUser[] users)
@@ -346,7 +347,7 @@ namespace NadekoBot.Modules.Administration
             }
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(GuildPermission.DeafenMembers)]
         public async Task Deafen(IUserMessage umsg, params IGuildUser[] users)
@@ -369,7 +370,7 @@ namespace NadekoBot.Modules.Administration
             }
 
         }
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(GuildPermission.DeafenMembers)]
         public async Task UnDeafen(IUserMessage umsg, params IGuildUser[] users)
@@ -392,7 +393,7 @@ namespace NadekoBot.Modules.Administration
             }
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(GuildPermission.ManageChannels)]
         public async Task DelVoiChanl(IUserMessage umsg, [Remainder] IVoiceChannel voiceChannel)
@@ -401,7 +402,7 @@ namespace NadekoBot.Modules.Administration
             await umsg.Channel.SendMessageAsync($"Removed channel **{voiceChannel.Name}**.").ConfigureAwait(false);
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(GuildPermission.ManageChannels)]
         public async Task CreatVoiChanl(IUserMessage umsg, [Remainder] string channelName)
@@ -411,7 +412,7 @@ namespace NadekoBot.Modules.Administration
             await channel.SendMessageAsync($"Created voice channel **{ch.Name}**, id `{ch.Id}`.").ConfigureAwait(false);
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(GuildPermission.ManageChannels)]
         public async Task DelTxtChanl(IUserMessage umsg, [Remainder] ITextChannel channel)
@@ -420,7 +421,7 @@ namespace NadekoBot.Modules.Administration
             await channel.SendMessageAsync($"Removed text channel **{channel.Name}**, id `{channel.Id}`.").ConfigureAwait(false);
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(GuildPermission.ManageChannels)]
         public async Task CreaTxtChanl(IUserMessage umsg, [Remainder] string channelName)
@@ -430,7 +431,7 @@ namespace NadekoBot.Modules.Administration
             await channel.SendMessageAsync($"Added text channel **{txtCh.Name}**, id `{txtCh.Id}`.").ConfigureAwait(false);
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(GuildPermission.ManageChannels)]
         public async Task SetTopic(IUserMessage umsg, [Remainder] string topic = null)
@@ -441,7 +442,7 @@ namespace NadekoBot.Modules.Administration
             await channel.SendMessageAsync(":ok: **New channel topic set.**").ConfigureAwait(false);
 
         }
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(GuildPermission.ManageChannels)]
         public async Task SetChanlName(IUserMessage umsg, [Remainder] string name)
@@ -454,7 +455,7 @@ namespace NadekoBot.Modules.Administration
 
 
         //delets her own messages, no perm required
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         public async Task Prune(IUserMessage umsg)
         {
@@ -467,7 +468,7 @@ namespace NadekoBot.Modules.Administration
         }
 
         // prune x
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(ChannelPermission.ManageMessages)]
         public async Task Prune(IUserMessage msg, int count)
@@ -486,7 +487,7 @@ namespace NadekoBot.Modules.Administration
         }
 
         //prune @user [x]
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(ChannelPermission.ManageMessages)]
         public async Task Prune(IUserMessage msg, IGuildUser user, int count = 100)
@@ -497,19 +498,19 @@ namespace NadekoBot.Modules.Administration
             await msg.Channel.DeleteMessagesAsync(enumerable);
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         [OwnerOnly]
         public async Task Die(IUserMessage umsg)
         {
             var channel = (ITextChannel)umsg.Channel;
 
-            await channel.SendMessageAsync("`Shutting down.`").ConfigureAwait(false);
+            try { await channel.SendMessageAsync("`Shutting down.`").ConfigureAwait(false); } catch (Exception ex) { _log.Warn(ex); }
             await Task.Delay(2000).ConfigureAwait(false);
             Environment.Exit(0);
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         [OwnerOnly]
         public async Task Setname(IUserMessage umsg, [Remainder] string newName)
@@ -523,7 +524,7 @@ namespace NadekoBot.Modules.Administration
             await channel.SendMessageAsync($"Successfully changed name to {newName}").ConfigureAwait(false);
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         [OwnerOnly]
         public async Task NewAvatar(IUserMessage umsg, [Remainder] string img = null)
@@ -548,7 +549,7 @@ namespace NadekoBot.Modules.Administration
             await channel.SendMessageAsync("New avatar set.").ConfigureAwait(false);
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         [OwnerOnly]
         public async Task SetGame(IUserMessage umsg, [Remainder] string game = null)
@@ -562,7 +563,7 @@ namespace NadekoBot.Modules.Administration
             await channel.SendMessageAsync("New game set.").ConfigureAwait(false);
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         [OwnerOnly]
         public async Task Send(IUserMessage umsg, string where, [Remainder] string msg = null)
@@ -589,7 +590,7 @@ namespace NadekoBot.Modules.Administration
                 {
                     return;
                 }
-                await ch.SendMessageAsync(msg);
+                await ch.SendMessageAsync(msg).ConfigureAwait(false);
             }
             else if (ids[1].ToUpperInvariant().StartsWith("U:"))
             {
@@ -599,30 +600,32 @@ namespace NadekoBot.Modules.Administration
                 {
                     return;
                 }
-                await user.SendMessageAsync(msg);
+                await user.SendMessageAsync(msg).ConfigureAwait(false);
             }
             else
             {
-                await channel.SendMessageAsync("`Invalid format.`");
+                await channel.SendMessageAsync("`Invalid format.`").ConfigureAwait(false);
             }
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         [OwnerOnly]
         public async Task Announce(IUserMessage umsg, [Remainder] string message)
         {
             var channel = (ITextChannel)umsg.Channel;
 
-            foreach (var ch in _client.GetGuilds().Select(async g => await g.GetDefaultChannelAsync().ConfigureAwait(false)))
-            {
-                await channel.SendMessageAsync(message).ConfigureAwait(false);
-            }
+            var channels = await Task.WhenAll(_client.GetGuilds().Select(g =>
+                g.GetDefaultChannelAsync()
+            )).ConfigureAwait(false);
+
+            await Task.WhenAll(channels.Select(c => c.SendMessageAsync($"`Message from {umsg.Author} (Bot Owner):` " + message)))
+                    .ConfigureAwait(false);
 
             await channel.SendMessageAsync(":ok:").ConfigureAwait(false);
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         [OwnerOnly]
         public async Task SaveChat(IUserMessage umsg, int cnt)
@@ -655,7 +658,7 @@ namespace NadekoBot.Modules.Administration
         }
 
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(GuildPermission.MentionEveryone)]
         public async Task MentionRole(IUserMessage umsg, params IRole[] roles)
@@ -680,7 +683,7 @@ namespace NadekoBot.Modules.Administration
             await channel.SendMessageAsync(send).ConfigureAwait(false);
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         public async Task Donators(IUserMessage umsg)
         {
@@ -696,7 +699,7 @@ namespace NadekoBot.Modules.Administration
         }
 
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         public async Task Donadd(IUserMessage umsg, IUser donator, int amount)
         {

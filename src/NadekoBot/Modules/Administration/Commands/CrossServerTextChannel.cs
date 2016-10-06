@@ -4,6 +4,7 @@ using Discord.WebSocket;
 using NadekoBot.Attributes;
 using NadekoBot.Extensions;
 using NadekoBot.Services;
+using NLog;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -19,6 +20,7 @@ namespace NadekoBot.Modules.Administration
         {
             public CrossServerTextChannel()
             {
+                _log = LogManager.GetCurrentClassLogger();
                 NadekoBot.Client.MessageReceived += (imsg) =>
                 {
                     var msg = imsg as IUserMessage;
@@ -31,8 +33,6 @@ namespace NadekoBot.Modules.Administration
 
                     Task.Run(async () =>
                     {
-                        try
-                        {
                             if (msg.Author.Id == NadekoBot.Client.GetCurrentUser().Id) return;
                             foreach (var subscriber in Subscribers)
                             {
@@ -41,11 +41,9 @@ namespace NadekoBot.Modules.Administration
                                     continue;
                                 foreach (var chan in set.Except(new[] { channel }))
                                 {
-                                    await chan.SendMessageAsync(GetText(channel.Guild, channel, (IGuildUser)msg.Author, msg)).ConfigureAwait(false);
+                                    try { await chan.SendMessageAsync(GetText(channel.Guild, channel, (IGuildUser)msg.Author, msg)).ConfigureAwait(false); } catch (Exception ex) { _log.Warn(ex); }
                                 }
                             }
-                        }
-                        catch { }
                     });
                     return Task.CompletedTask;
                 };
@@ -55,8 +53,9 @@ namespace NadekoBot.Modules.Administration
                 $"**{server.Name} | {channel.Name}** `{user.Username}`: " + message.Content;
             
             public static readonly ConcurrentDictionary<int, HashSet<ITextChannel>> Subscribers = new ConcurrentDictionary<int, HashSet<ITextChannel>>();
+            private Logger _log { get; }
 
-            [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+            [NadekoCommand, Usage, Description, Aliases]
             [RequireContext(ContextType.Guild)]
             [OwnerOnly]
             public async Task Scsc(IUserMessage msg)
@@ -71,7 +70,7 @@ namespace NadekoBot.Modules.Administration
                 }
             }
 
-            [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+            [NadekoCommand, Usage, Description, Aliases]
             [RequireContext(ContextType.Guild)]
             [RequirePermission(GuildPermission.ManageGuild)]
             public async Task Jcsc(IUserMessage imsg, int token)
@@ -85,7 +84,7 @@ namespace NadekoBot.Modules.Administration
                 await channel.SendMessageAsync(":ok:").ConfigureAwait(false);
             }
 
-            [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+            [NadekoCommand, Usage, Description, Aliases]
             [RequireContext(ContextType.Guild)]
             [RequirePermission(GuildPermission.ManageGuild)]
             public async Task Lcsc(IUserMessage imsg)

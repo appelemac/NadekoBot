@@ -14,9 +14,9 @@ namespace NadekoBot.Modules.Utility
 {
     public partial class Utility
     {
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
-        public async Task ShowQuote(IUserMessage umsg, string keyword)
+        public async Task ShowQuote(IUserMessage umsg, [Remainder] string keyword)
         {
             var channel = (ITextChannel)umsg.Channel;
 
@@ -37,7 +37,7 @@ namespace NadekoBot.Modules.Utility
             await channel.SendMessageAsync("📣 " + quote.Text);
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         public async Task AddQuote(IUserMessage umsg, string keyword, [Remainder] string text)
         {
@@ -59,13 +59,13 @@ namespace NadekoBot.Modules.Utility
                     Text = text,
                 });
                 await uow.CompleteAsync().ConfigureAwait(false);
-                await channel.SendMessageAsync("`Quote added.`").ConfigureAwait(false);
             }
+            await channel.SendMessageAsync("`Quote added.`").ConfigureAwait(false);
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
-        public async Task DeleteQuote(IUserMessage umsg, string keyword)
+        public async Task DeleteQuote(IUserMessage umsg, [Remainder] string keyword)
         {
             var channel = (ITextChannel)umsg.Channel;
 
@@ -73,24 +73,25 @@ namespace NadekoBot.Modules.Utility
                 return;
 
             keyword = keyword.ToUpperInvariant();
-
+            string response;
             using (var uow = DbHandler.UnitOfWork())
             {
-                var q = await uow.Quotes.GetRandomQuoteByKeywordAsync(channel.Guild.Id, keyword);
+                var q = await uow.Quotes.GetRandomQuoteByKeywordAsync(channel.Guild.Id, keyword).ConfigureAwait(false);
 
                 if (q == null)
                 {
-                    await channel.SendMessageAsync("`No quotes found.`");
+                    response = "`No quotes found.`";
                     return;
                 }
 
                 uow.Quotes.Remove(q);
-                await uow.CompleteAsync();
+                await uow.CompleteAsync().ConfigureAwait(false);
+                response = "`Deleted a random quote`";
             }
-            await channel.SendMessageAsync("`Deleted a random quote.`");
+            await channel.SendMessageAsync(response);
         }
 
-        [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+        [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         public async Task DelAllQuotes(IUserMessage umsg, string keyword)
         {

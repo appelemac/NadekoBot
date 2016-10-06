@@ -68,9 +68,9 @@ namespace NadekoBot.Modules.Searches
                                         msg += $"\n`Here is the Link:`【 http://www.twitch.tv/{stream.Username}/ 】";
                                     else if (stream.Type == FollowedStream.FollowedStreamType.Beam)
                                         msg += $"\n`Here is the Link:`【 http://www.beam.pro/{stream.Username}/ 】";
-                                    //else if (stream.Type == FollowedStream.FollowedStreamType.YoutubeGaming)
-                                    //    msg += $"\n`Here is the Link:`【 not implemented yet - {stream.Username} 】";
-                                await channel.SendMessageAsync(msg).ConfigureAwait(false);
+                                //else if (stream.Type == FollowedStream.FollowedStreamType.YoutubeGaming)
+                                //    msg += $"\n`Here is the Link:`【 not implemented yet - {stream.Username} 】";
+                                try { await channel.SendMessageAsync(msg).ConfigureAwait(false); } catch { }
                             }
                         }
                         FirstPass = false;
@@ -132,28 +132,28 @@ namespace NadekoBot.Modules.Searches
                 return new Tuple<bool, string>(false, "0");
             }
 
-            [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+            [NadekoCommand, Usage, Description, Aliases]
             [RequireContext(ContextType.Guild)]
             [RequirePermission(GuildPermission.ManageMessages)]
             public async Task Hitbox(IUserMessage msg, [Remainder] string username) =>
                 await TrackStream((ITextChannel)msg.Channel, username, FollowedStream.FollowedStreamType.Hitbox)
                     .ConfigureAwait(false);
 
-            [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+            [NadekoCommand, Usage, Description, Aliases]
             [RequireContext(ContextType.Guild)]
             [RequirePermission(GuildPermission.ManageMessages)]
             public async Task Twitch(IUserMessage msg, [Remainder] string username) =>
                 await TrackStream((ITextChannel)msg.Channel, username, FollowedStream.FollowedStreamType.Twitch)
                     .ConfigureAwait(false);
 
-            [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+            [NadekoCommand, Usage, Description, Aliases]
             [RequireContext(ContextType.Guild)]
             [RequirePermission(GuildPermission.ManageMessages)]
             public async Task Beam(IUserMessage msg, [Remainder] string username) =>
                 await TrackStream((ITextChannel)msg.Channel, username, FollowedStream.FollowedStreamType.Beam)
                     .ConfigureAwait(false);
 
-            [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+            [NadekoCommand, Usage, Description, Aliases]
             [RequireContext(ContextType.Guild)]
             public async Task ListStreams(IUserMessage imsg)
             {
@@ -179,7 +179,7 @@ namespace NadekoBot.Modules.Searches
                 await channel.SendMessageAsync($"You are following **{streams.Count()}** streams on this server.\n\n" + text).ConfigureAwait(false);
             }
 
-            [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+            [NadekoCommand, Usage, Description, Aliases]
             [RequireContext(ContextType.Guild)]
             public async Task RemoveStream(IUserMessage msg, [Remainder] string username)
             {
@@ -207,7 +207,7 @@ namespace NadekoBot.Modules.Searches
                 await channel.SendMessageAsync($":ok: Removed `{toRemove.Username}`'s stream ({toRemove.Type}) from notifications.").ConfigureAwait(false);
             }
 
-            [LocalizedCommand, LocalizedRemarks, LocalizedSummary, LocalizedAlias]
+            [NadekoCommand, Usage, Description, Aliases]
             [RequireContext(ContextType.Guild)]
             public async Task CheckStream(IUserMessage imsg, FollowedStream.FollowedStreamType platform, [Remainder] string username)
             {

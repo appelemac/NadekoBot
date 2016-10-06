@@ -23,6 +23,7 @@ namespace NadekoBot.Services.Database
         public DbSet<ConvertUnit> ConversionUnits { get; set; }
         public DbSet<TypingArticle> TypingArticles { get; set; }
         public DbSet<CustomReaction> CustomReactions { get; set; }
+        public DbSet<MusicPlaylist> MusicPlaylists { get; set; }
 
         //logging
         public DbSet<LogSetting> LogSettings { get; set; }
@@ -187,7 +188,7 @@ namespace NadekoBot.Services.Database
             permissionEntity
                 .HasOne(p => p.Next)
                 .WithOne(p => p.Previous);
-                
+
             #endregion
 
             #region LogSettings
@@ -202,6 +203,17 @@ namespace NadekoBot.Services.Database
             //logSettingEntity
             //    .HasMany(ls => ls.IgnoredVoicePresenceChannelIds)
             //    .WithOne(ls => ls.LogSetting);
+            #endregion
+
+            #region MusicPlaylists
+            var musicPlaylistEntity = modelBuilder.Entity<MusicPlaylist>();
+
+            musicPlaylistEntity
+                .HasMany(p => p.Songs)
+                .WithOne()
+                .OnDelete(Microsoft.EntityFrameworkCore.Metadata.DeleteBehavior.Cascade);
+                
+
             #endregion
         }
         protected abstract override void OnConfiguring(DbContextOptionsBuilder optionsBuilder);
