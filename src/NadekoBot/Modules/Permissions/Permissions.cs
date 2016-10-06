@@ -162,10 +162,10 @@ namespace NadekoBot.Modules.Permissions
 
         [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
-        public async Task SrvrCmd(IUserMessage imsg, Command command, PermissionAction action)
+        public async Task SrvrCmd(IUserMessage imsg, PermissionCommand command, PermissionAction action)
         {
             var channel = (ITextChannel)imsg.Channel;
-
+            
             using (var uow = DbHandler.UnitOfWork())
             {
                 var newPerm = new Permission
