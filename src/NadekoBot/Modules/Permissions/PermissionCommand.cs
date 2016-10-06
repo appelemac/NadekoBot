@@ -16,7 +16,7 @@ namespace NadekoBot.Modules.Permissions
         {
             get
             {
-                return IsCommand ? Command.Text : CustomReaction.Trigger;
+                return IsCommand ? Command.Text : CustomReaction.Id.ToString();
             }
         }
     }

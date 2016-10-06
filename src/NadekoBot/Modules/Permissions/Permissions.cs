@@ -206,7 +206,7 @@ namespace NadekoBot.Modules.Permissions
 
         [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
-        public async Task UsrCmd(IUserMessage imsg, Command command, PermissionAction action, [Remainder] IGuildUser user)
+        public async Task UsrCmd(IUserMessage imsg, PermissionCommand command, PermissionAction action, [Remainder] IGuildUser user)
         {
             var channel = (ITextChannel)imsg.Channel;
 
@@ -250,7 +250,7 @@ namespace NadekoBot.Modules.Permissions
 
         [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
-        public async Task RoleCmd(IUserMessage imsg, Command command, PermissionAction action, [Remainder] IRole role)
+        public async Task RoleCmd(IUserMessage imsg, PermissionCommand command, PermissionAction action, [Remainder] IRole role)
         {
             var channel = (ITextChannel)imsg.Channel;
 
@@ -294,7 +294,7 @@ namespace NadekoBot.Modules.Permissions
 
         [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
-        public async Task ChnlCmd(IUserMessage imsg, Command command, PermissionAction action, [Remainder] ITextChannel chnl)
+        public async Task ChnlCmd(IUserMessage imsg, PermissionCommand command, PermissionAction action, [Remainder] ITextChannel chnl)
         {
             var channel = (ITextChannel)imsg.Channel;
             try
