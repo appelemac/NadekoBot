@@ -112,7 +112,7 @@ namespace NadekoBot.Modules.CustomReactions
                         permRole = config.PermissionRole.Trim().ToLowerInvariant();
                     }
                     int index;
-                    if (!rootPerm.AsEnumerable().CheckPermissions(msg, reaction.Id.ToString(), "CustomReactions", out index))
+                    if (!rootPerm.AsEnumerable().CheckPermissions(msg, reaction.Id.ToString(), NadekoBot.ModulePrefixes[typeof(CustomReactions).Name], out index))
                     {
                         var returnMsg = $"Permission number #{index + 1} **{rootPerm.GetAt(index).GetCommand()}** is preventing this action.";
                     }
