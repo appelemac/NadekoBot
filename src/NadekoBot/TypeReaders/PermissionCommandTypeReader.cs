@@ -12,11 +12,7 @@ namespace NadekoBot.TypeReaders
 {
     public class PermissionCommandTypeReader : TypeReader
     {
-        public PermissionCommandTypeReader() : base()
-        {
-            permCommandReader = new PermissionCommandTypeReader();
-        }
-        TypeReaders.PermissionCommandTypeReader permCommandReader { get; set; }
+        TypeReaders.CommandTypeReader permCommandReader { get; set; }
 
         /// <summary>
         /// rough and riddled implementation
@@ -26,6 +22,8 @@ namespace NadekoBot.TypeReaders
         /// <returns></returns>
         public override async Task<TypeReaderResult> Read(IUserMessage context, string input)
         {
+            if (permCommandReader == null)
+                permCommandReader = new CommandTypeReader();
             var permResult = await permCommandReader.Read(context, input);
             if (permResult.IsSuccess) return TypeReaderResult.FromSuccess(new PermissionCommand { Command = (Command)permResult.Values.FirstOrDefault().Value, IsCommand = true });
             if (input.StartsWith("CR")) input = input.Substring(2).Trim();
@@ -40,7 +38,7 @@ namespace NadekoBot.TypeReaders
             var found = reactions.FirstOrDefault(x => x.Id == id);
             if (found != null)
             {
-                return TypeReaderResult.FromSuccess(new PermissionCommand { CustomReaction = (CustomReaction)permResult.Values.FirstOrDefault().Value, IsCommand = false });
+                return TypeReaderResult.FromSuccess(new PermissionCommand { CustomReaction = found, IsCommand = false });
             }
             return TypeReaderResult.FromError(CommandError.ObjectNotFound, "id not found");
         }
