@@ -282,7 +282,6 @@ namespace NadekoBot.Modules.Music
             {
                 try
                 {
-
                     await QueueSong(((IGuildUser)umsg.Author), channel, ((IGuildUser)umsg.Author).VoiceChannel, id, true).ConfigureAwait(false);
                 }
                 catch (PlaylistFullException)
@@ -322,7 +321,7 @@ namespace NadekoBot.Modules.Music
                             Uri = svideo.StreamLink,
                             ProviderType = MusicType.Normal,
                             Query = svideo.TrackLink,
-                        }), ((IGuildUser)umsg.Author).Username);
+                        }), ((IGuildUser)umsg.Author).Username, partOfPlaylist: true);
                     }
                     catch (PlaylistFullException) { break; }
                     catch (OperationCanceledException)
