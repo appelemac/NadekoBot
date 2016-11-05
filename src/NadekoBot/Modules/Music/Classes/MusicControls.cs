@@ -38,7 +38,7 @@ namespace NadekoBot.Modules.Music.Classes
         private CancellationToken cancelToken { get; set; }
 
         public CancellationTokenSource PlayListCancelSource { get; private set; }
-        private CancellationToken PlayListCancelToken { get; set; }
+        public CancellationToken PlayListCancelToken { get; private set; }
 
         public bool Paused { get; set; }
 
@@ -77,7 +77,6 @@ namespace NadekoBot.Modules.Music.Classes
                     {
                         try
                         {
-                            PlayListCancelToken.ThrowIfCancellationRequested();
                             Action action;
                             if (actionQueue.TryDequeue(out action))
                             {
@@ -201,12 +200,13 @@ namespace NadekoBot.Modules.Music.Classes
             });
         }
 
-        public void AddSong(Song s, string username)
+        public void AddSong(Song s, string username, bool partOfPlaylist = false)
         {
             if (s == null)
                 throw new ArgumentNullException(nameof(s));
             ThrowIfQueueFull();
-            PlayListCancelToken.ThrowIfCancellationRequested();
+            if (partOfPlaylist)
+                PlayListCancelToken.ThrowIfCancellationRequested();
             actionQueue.Enqueue(() =>
             {
                 s.MusicPlayer = this;
@@ -215,11 +215,11 @@ namespace NadekoBot.Modules.Music.Classes
             });
         }
 
-        public void AddSong(Song s, int index)
+        public void AddSong(Song s, int index, bool partOfPlaylist = false)
         {
             if (s == null)
                 throw new ArgumentNullException(nameof(s));
-            PlayListCancelToken.ThrowIfCancellationRequested();
+            if (partOfPlaylist) PlayListCancelToken.ThrowIfCancellationRequested();
             actionQueue.Enqueue(() =>
             {
                 playlist.Insert(index, s);

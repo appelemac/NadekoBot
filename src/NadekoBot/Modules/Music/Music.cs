@@ -740,7 +740,7 @@ namespace NadekoBot.Modules.Music
                 await channel.SendMessageAsync("🎶`Autoplay enabled.`").ConfigureAwait(false);
         }
 
-        public static async Task QueueSong(IGuildUser queuer, ITextChannel textCh, IVoiceChannel voiceCh, string query, bool silent = false, MusicType musicType = MusicType.Normal)
+        public static async Task QueueSong(IGuildUser queuer, ITextChannel textCh, IVoiceChannel voiceCh, string query, bool silent = false, MusicType musicType = MusicType.Normal, bool partOfPlaylist = false)
         {
             if (voiceCh == null || voiceCh.Guild != textCh.Guild)
             {
@@ -802,7 +802,7 @@ namespace NadekoBot.Modules.Music
                 musicPlayer.ThrowIfQueueFull();
                 resolvedSong = await Song.ResolveSong(query, musicType).ConfigureAwait(false);
 
-                musicPlayer.AddSong(resolvedSong, queuer.Username);
+                musicPlayer.AddSong(resolvedSong, queuer.Username, partOfPlaylist);
             }
             catch (PlaylistFullException)
             {
