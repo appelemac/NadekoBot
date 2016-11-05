@@ -37,6 +37,9 @@ namespace NadekoBot.Modules.Music.Classes
         public CancellationTokenSource SongCancelSource { get; private set; }
         private CancellationToken cancelToken { get; set; }
 
+        public CancellationTokenSource PlayListCancelSource { get; private set; }
+        private CancellationToken PlayListCancelToken { get; set; }
+
         public bool Paused { get; set; }
 
         public float Volume { get; private set; }
@@ -62,6 +65,8 @@ namespace NadekoBot.Modules.Music.Classes
 
             PlaybackVoiceChannel = startingVoiceChannel;
             SongCancelSource = new CancellationTokenSource();
+            PlayListCancelSource = new CancellationTokenSource();
+            PlayListCancelToken = PlayListCancelSource.Token;
             cancelToken = SongCancelSource.Token;
 
             Task.Run(async () =>
@@ -72,6 +77,7 @@ namespace NadekoBot.Modules.Music.Classes
                     {
                         try
                         {
+                            PlayListCancelToken.ThrowIfCancellationRequested();
                             Action action;
                             if (actionQueue.TryDequeue(out action))
                             {
@@ -158,6 +164,7 @@ namespace NadekoBot.Modules.Music.Classes
 
         public void Stop()
         {
+            PlayListCancelSource.Cancel();
             actionQueue.Enqueue(() =>
             {
                 RepeatPlaylist = false;
@@ -199,6 +206,7 @@ namespace NadekoBot.Modules.Music.Classes
             if (s == null)
                 throw new ArgumentNullException(nameof(s));
             ThrowIfQueueFull();
+            PlayListCancelToken.ThrowIfCancellationRequested();
             actionQueue.Enqueue(() =>
             {
                 s.MusicPlayer = this;
@@ -211,6 +219,7 @@ namespace NadekoBot.Modules.Music.Classes
         {
             if (s == null)
                 throw new ArgumentNullException(nameof(s));
+            PlayListCancelToken.ThrowIfCancellationRequested();
             actionQueue.Enqueue(() =>
             {
                 playlist.Insert(index, s);
@@ -272,6 +281,7 @@ namespace NadekoBot.Modules.Music.Classes
 
         public void Destroy()
         {
+            PlayListCancelSource.Cancel();
             actionQueue.Enqueue(async () =>
             {
                 RepeatPlaylist = false;
@@ -306,5 +316,12 @@ namespace NadekoBot.Modules.Music.Classes
             if (playlist.Count >= MaxQueueSize)
                 throw new PlaylistFullException();
         }
+
+        public void ResetPlayListCancelToken()
+        {
+            PlayListCancelSource = new CancellationTokenSource();
+            PlayListCancelToken = PlayListCancelSource.Token;
+        }
+
     }
 }

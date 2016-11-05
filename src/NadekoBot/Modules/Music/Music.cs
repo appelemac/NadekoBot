@@ -23,6 +23,8 @@ namespace NadekoBot.Modules.Music
     {
         public static ConcurrentDictionary<ulong, MusicPlayer> MusicPlayers = new ConcurrentDictionary<ulong, MusicPlayer>();
 
+
+
         public const string MusicDataPath = "data/musicdata";
         private IGoogleApiService _google;
 
@@ -280,6 +282,7 @@ namespace NadekoBot.Modules.Music
             {
                 try
                 {
+
                     await QueueSong(((IGuildUser)umsg.Author), channel, ((IGuildUser)umsg.Author).VoiceChannel, id, true).ConfigureAwait(false);
                 }
                 catch (PlaylistFullException)
@@ -322,6 +325,11 @@ namespace NadekoBot.Modules.Music
                         }), ((IGuildUser)umsg.Author).Username);
                     }
                     catch (PlaylistFullException) { break; }
+                    catch (OperationCanceledException)
+                    {
+                        mp.ResetPlayListCancelToken();
+                        return;
+                    }
                 }
             }
         }
@@ -349,7 +357,7 @@ namespace NadekoBot.Modules.Music
                     catch (PlaylistFullException)
                     {
                         break;
-                    }
+                    } 
                     catch { }
                 }
                 await channel.SendMessageAsync("🎵 `Directory queue complete.`").ConfigureAwait(false);
@@ -800,6 +808,10 @@ namespace NadekoBot.Modules.Music
             {
                 try { await textCh.SendMessageAsync($"🎵 `Queue is full at {musicPlayer.MaxQueueSize}/{musicPlayer.MaxQueueSize}.` "); } catch { }
                 throw;
+            } catch (OperationCanceledException)
+            {
+                musicPlayer.ResetPlayListCancelToken();
+                return;
             }
             if (!silent)
             {
